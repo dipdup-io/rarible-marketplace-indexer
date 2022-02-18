@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "rarible-marketplace-indexer"
+version = "0.1.0"
+description = "DipDup indexer for Rarible marketplaces orders in Tezos"
+authors = ["Igor Sereda <sereda.igor.s@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "tmp/rarible-indexer"}
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.941"
+isort = "^5.10.1"
+flakeheaven = "^0.11.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+line_length = 140
+force_single_line = true
+
+[tool.black]
+line-length = 140
+target-version = ['py310']
+skip-string-normalization = true
+
+[tool.flakehell]
+format = "colored"
+max_line_length = 140
+show_source = true
+extended_default_ignore = []
+
+[tool.flakehell.plugins]
+pyflakes = ["+*"]
+flake8-docstrings = ["-*"]
+flake8-simplify = ["-SIM106"]
