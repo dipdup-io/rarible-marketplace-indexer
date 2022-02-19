@@ -1,0 +1,111 @@
+spec_version: 1.2
+package: rarible_marketplace_indexer
+
+datasources:
+  tzkt_mainnet:
+    kind: tzkt
+    url: https://api.tzkt.io
+  tzkt_hangzhou2net:
+    kind: tzkt
+    url: https://api.hangzhou2net.tzkt.io
+
+contracts:
+  hen_mainnet:
+    address: KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn
+    typename: hen_marketplace
+
+  objkt_mainnet:
+    address: KT1FvqJwEDWb1Gwc55Jd1jjTHRVWbYKUUpyq
+    typename: objkt_marketplace
+  objkt_v2_mainnet:
+    address: KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC
+    typename: objkt_marketplace_v2
+
+  rarible_exchange_hangzhou2net:
+    address: KT1QZ3yLmojkaTaPBoDq9uZ4V1iggoN1bmGk
+    typename: rarible_exchange
+
+indexes:
+  hen_actions:
+    kind: operation
+    datasource: tzkt_mainnet
+    contracts:
+      - hen_mainnet
+    handlers:
+      - callback: hen_order_list
+        pattern:
+          - destination: hen_mainnet
+            entrypoint: swap
+
+      - callback: hen_order_cancel_list
+        pattern:
+          - destination: hen_mainnet
+            entrypoint: cancel_swap
+
+      - callback: hen_order_match
+        pattern:
+          - destination: hen_mainnet
+            entrypoint: collect
+
+  objkt_actions:
+    kind: operation
+    datasource: tzkt_mainnet
+    contracts:
+      - objkt_mainnet
+    handlers:
+      - callback: objkt_order_list
+        pattern:
+          - destination: objkt_mainnet
+            entrypoint: ask
+
+      - callback: objkt_order_cancel_list
+        pattern:
+          - destination: objkt_mainnet
+            entrypoint: retract_ask
+
+      - callback: objkt_order_match
+        pattern:
+          - destination: objkt_mainnet
+            entrypoint: fulfill_ask
+
+  objkt_v2_actions:
+    kind: operation
+    datasource: tzkt_mainnet
+    contracts:
+      - objkt_v2_mainnet
+    handlers:
+      - callback: objkt_order_list
+        pattern:
+          - destination: objkt_v2_mainnet
+            entrypoint: ask
+
+      - callback: objkt_order_cancel_list
+        pattern:
+          - destination: objkt_v2_mainnet
+            entrypoint: retract_ask
+
+      - callback: objkt_order_match
+        pattern:
+          - destination: objkt_v2_mainnet
+            entrypoint: fulfill_ask
+
+  rarible_exchange_actions:
+    kind: operation
+    datasource: tzkt_hangzhou2net
+    contracts:
+      - rarible_exchange_hangzhou2net
+    handlers:
+      - callback: rarible_order_list
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: sell
+
+      - callback: rarible_order_cancel_list
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: cancel_sale
+
+      - callback: rarible_order_match
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: buy
