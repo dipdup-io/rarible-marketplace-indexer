@@ -1,6 +1,26 @@
 spec_version: 1.2
 package: rarible_marketplace_indexer
 
+database:
+  kind: sqlite
+  path: db.sqlite3
+
+#database:
+#  kind: postgres
+#  host: db
+#  port: 5432
+#  user: ${POSTGRES_USER:-dipdup}
+#  password: ${POSTGRES_PASSWORD:-changeme}
+#  database: ${POSTGRES_DB:-dipdup}
+#
+#hasura:
+#  url: http://hasura:8080
+#  admin_secret: ${ADMIN_SECRET:-changeme}
+#  select_limit: ${SELECT_LIMIT:-1000}
+#  camel_case: true
+#  allow_aggregations: false
+#  rest: true
+
 datasources:
   tzkt_mainnet:
     kind: tzkt
@@ -26,26 +46,26 @@ contracts:
     typename: rarible_exchange
 
 indexes:
-  hen_actions:
-    kind: operation
-    datasource: tzkt_mainnet
-    contracts:
-      - hen_mainnet
-    handlers:
-      - callback: hen_order_list
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: swap
-
-      - callback: hen_order_cancel_list
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: cancel_swap
-
-      - callback: hen_order_match
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: collect
+#  hen_actions:
+#    kind: operation
+#    datasource: tzkt_mainnet
+#    contracts:
+#      - hen_mainnet
+#    handlers:
+#      - callback: hen_order_list
+#        pattern:
+#          - destination: hen_mainnet
+#            entrypoint: swap
+#
+#      - callback: hen_order_cancel_list
+#        pattern:
+#          - destination: hen_mainnet
+#            entrypoint: cancel_swap
+#
+#      - callback: hen_order_match
+#        pattern:
+#          - destination: hen_mainnet
+#            entrypoint: collect
 
   objkt_actions:
     kind: operation
@@ -67,45 +87,48 @@ indexes:
         pattern:
           - destination: objkt_mainnet
             entrypoint: fulfill_ask
+#
+#  objkt_v2_actions:
+#    kind: operation
+#    datasource: tzkt_mainnet
+#    contracts:
+#      - objkt_v2_mainnet
+#    handlers:
+#      - callback: objkt_v2_order_list
+#        pattern:
+#          - destination: objkt_v2_mainnet
+#            entrypoint: ask
+#
+#      - callback: objkt_v2_order_cancel_list
+#        pattern:
+#          - destination: objkt_v2_mainnet
+#            entrypoint: retract_ask
+#
+#      - callback: objkt_v2_order_match
+#        pattern:
+#          - destination: objkt_v2_mainnet
+#            entrypoint: fulfill_ask
+#
+#  rarible_exchange_actions:
+#    kind: operation
+#    datasource: tzkt_hangzhou2net
+#    contracts:
+#      - rarible_exchange_hangzhou2net
+#    handlers:
+#      - callback: rarible_order_list
+#        pattern:
+#          - destination: rarible_exchange_hangzhou2net
+#            entrypoint: sell
+#
+#      - callback: rarible_order_cancel_list
+#        pattern:
+#          - destination: rarible_exchange_hangzhou2net
+#            entrypoint: cancel_sale
+#
+#      - callback: rarible_order_match
+#        pattern:
+#          - destination: rarible_exchange_hangzhou2net
+#            entrypoint: buy
 
-  objkt_v2_actions:
-    kind: operation
-    datasource: tzkt_mainnet
-    contracts:
-      - objkt_v2_mainnet
-    handlers:
-      - callback: objkt_order_list
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: ask
-
-      - callback: objkt_order_cancel_list
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: retract_ask
-
-      - callback: objkt_order_match
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: fulfill_ask
-
-  rarible_exchange_actions:
-    kind: operation
-    datasource: tzkt_hangzhou2net
-    contracts:
-      - rarible_exchange_hangzhou2net
-    handlers:
-      - callback: rarible_order_list
-        pattern:
-          - destination: rarible_exchange_hangzhou2net
-            entrypoint: sell
-
-      - callback: rarible_order_cancel_list
-        pattern:
-          - destination: rarible_exchange_hangzhou2net
-            entrypoint: cancel_sale
-
-      - callback: rarible_order_match
-        pattern:
-          - destination: rarible_exchange_hangzhou2net
-            entrypoint: buy
+#custom:
+#  kafka_url: http://kafka_kafka0:9092
