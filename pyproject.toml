@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.10"
 dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "tmp/rarible-indexer"}
+kafka-python = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.941"
