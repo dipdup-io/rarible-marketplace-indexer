@@ -7,6 +7,9 @@ from tortoise import Model
 from tortoise import fields
 from tortoise.signals import post_save
 
+from rarible_marketplace_indexer.const import KafkaTopic
+from rarible_marketplace_indexer.producer import ProducerContainer
+
 
 class StatusEnum(Enum):
     ACTIVE: str = 'ACTIVE'
@@ -56,6 +59,7 @@ class Order(Model):
     status = fields.CharEnumField(StatusEnum)
     started_at = fields.DatetimeField()
     ended_at = fields.DatetimeField(null=True)
+    make_stock = fields.CharField(max_length=16)
     cancelled = fields.BooleanField()
     created_at = fields.DatetimeField(index=True)
     last_updated_at = fields.DatetimeField(index=True)
@@ -78,5 +82,5 @@ async def signal_post_save(
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    # producer.send()
-    pass
+    producer = ProducerContainer.get_instance()
+    producer.send(topic=KafkaTopic.ORDER_TOPIC, value=instance)

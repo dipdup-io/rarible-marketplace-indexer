@@ -130,5 +130,7 @@ indexes:
 #          - destination: rarible_exchange_hangzhou2net
 #            entrypoint: buy
 
-#custom:
-#  kafka_url: http://kafka_kafka0:9092
+custom:
+  kafka_address: kafka_kafka0:9092
+  client_id: dipdup-rarible-mainnet-producer
+  retries: 5
