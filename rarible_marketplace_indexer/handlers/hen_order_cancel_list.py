@@ -1,6 +1,3 @@
-from typing import TYPE_CHECKING
-
-# if TYPE_CHECKING:
 from dipdup.context import HandlerContext
 from dipdup.models import Transaction
 

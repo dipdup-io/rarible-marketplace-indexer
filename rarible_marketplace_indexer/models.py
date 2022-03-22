@@ -9,6 +9,10 @@ from tortoise.signals import post_save
 
 from rarible_marketplace_indexer.const import KafkaTopic
 from rarible_marketplace_indexer.producer import ProducerContainer
+from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValueField
+from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import XtzField
+from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import AccountAddressField
+from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHashField
 
 
 class StatusEnum(Enum):
@@ -33,41 +37,42 @@ class PlatformEnum(Enum):
 
 
 class Activity(Model):
-    id = fields.IntField(pk=True)
+    id = fields.BigIntField(pk=True)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
-    internal_order_id = fields.IntField()
-    maker = fields.CharField(max_length=36)
-    contract = fields.CharField(max_length=36)
-    token_id = fields.CharField(max_length=16)
-    amount = fields.CharField(max_length=16)
-    sell_price = fields.CharField(max_length=16)
-    action_level = fields.IntField()
-    action_timestamp = fields.DatetimeField()
+    internal_order_id = fields.CharField(max_length=32, index=True)
+    maker = AccountAddressField()
+    contract = AccountAddressField()
+    token_id = fields.TextField()
+    amount = AssetValueField()
+    sell_price = XtzField()
+    operation_level = fields.IntField()
+    operation_timestamp = fields.DatetimeField()
+    operation_hash = OperationHashField()
 
     class Meta:
         table = 'marketplace_activity'
 
 
 class Order(Model):
-    id = fields.IntField(pk=True)
-    network = fields.CharField(max_length=16)
-    fill = fields.CharField(max_length=16, null=True)
-    platform = fields.CharEnumField(PlatformEnum)
-    internal_order_id = fields.IntField(index=True)
-    status = fields.CharEnumField(StatusEnum)
+    id = fields.BigIntField(pk=True)
+    network = fields.CharField(max_length=16, index=True)
+    fill = XtzField(default=0)
+    platform = fields.CharEnumField(PlatformEnum, index=True)
+    internal_order_id = fields.CharField(max_length=32, index=True)
+    status = fields.CharEnumField(StatusEnum, index=True)
     started_at = fields.DatetimeField()
     ended_at = fields.DatetimeField(null=True)
-    make_stock = fields.CharField(max_length=16)
-    cancelled = fields.BooleanField()
+    make_stock = AssetValueField()
+    cancelled = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(index=True)
     last_updated_at = fields.DatetimeField(index=True)
-    make_price = fields.CharField(max_length=16)
-    maker = fields.CharField(max_length=36)
-    make_contract = fields.CharField(max_length=36)
-    make_token_id = fields.CharField(max_length=16)
-    make_amount = fields.CharField(max_length=16)
+    make_price = XtzField()
+    maker = AccountAddressField()
+    make_contract = AccountAddressField()
+    make_token_id = fields.TextField()
+    make_value = AssetValueField()
 
     class Meta:
         table = 'marketplace_order'
@@ -82,5 +87,10 @@ async def signal_post_save(
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.api_order import OrderFactory
+
     producer = ProducerContainer.get_instance()
-    producer.send(topic=KafkaTopic.ORDER_TOPIC, value=instance)
+    producer.send(
+        topic=KafkaTopic.ORDER_TOPIC,
+        value=OrderFactory.build(instance),
+    )

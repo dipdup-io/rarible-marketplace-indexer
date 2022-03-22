@@ -15,8 +15,22 @@ class ProducerContainer:
 
     @classmethod
     def create_instance(cls, config: CustomConfig) -> None:
-        cls.__instance = KafkaProducer(
-            bootstrap_servers=[config.kafka_address],  # noqa
-            client_id=config.client_id,  # noqa
-            retries=config.retries,  # noqa
-        )
+        if config.enabled != 'false':  # noqa
+            producer = KafkaProducer(
+                bootstrap_servers=[config.kafka_address],  # noqa
+                client_id=config.client_id,  # noqa
+                retries=config.retries,  # noqa
+            )
+        else:
+            producer = NullKafkaProducer()
+
+        cls.__instance = producer
+
+
+# noinspection PyMissingConstructor
+class NullKafkaProducer(KafkaProducer):
+    def __init__(self, **configs):
+        pass
+
+    def send(self, *args, **kwargs):
+        pass

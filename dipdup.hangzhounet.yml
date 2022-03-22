@@ -1,0 +1,31 @@
+datasources:
+  tzkt_hangzhou2net:
+    kind: tzkt
+    url: https://api.hangzhou2net.tzkt.io
+
+contracts:
+  rarible_exchange_hangzhou2net:
+    address: KT1QZ3yLmojkaTaPBoDq9uZ4V1iggoN1bmGk
+    typename: rarible_exchange
+
+indexes:
+  rarible_exchange_actions:
+    kind: operation
+    datasource: tzkt_hangzhou2net
+    contracts:
+      - rarible_exchange_hangzhou2net
+    handlers:
+      - callback: rarible_order_list
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: sell
+
+      - callback: rarible_order_cancel_list
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: cancel_sale
+
+      - callback: rarible_order_match
+        pattern:
+          - destination: rarible_exchange_hangzhou2net
+            entrypoint: buy

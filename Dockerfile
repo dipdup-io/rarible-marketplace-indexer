@@ -61,7 +61,7 @@ USER $APP_USER
 
 ARG SOURCE_DIR
 COPY --chown=$APP_USER $SOURCE_DIR ./$SOURCE_DIR
-COPY --chown=$APP_USER dipdup.yml ./
+COPY --chown=$APP_USER dipdup*.yml ./
 
 ENTRYPOINT ["dipdup"]
 CMD ["run"]

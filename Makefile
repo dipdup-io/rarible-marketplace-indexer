@@ -7,16 +7,16 @@ install:
 	poetry install `if [ "${DEV}" = "0" ]; then echo "--no-dev"; fi`
 
 isort:
-	poetry run isort $(source_dir)
+	poetry run isort $(source_dir) tests
 
 black:
-	poetry run black $(source_dir)
+	poetry run black $(source_dir) tests
 
 flake:
-	poetry run flakeheaven lint $(source_dir)
+	poetry run flakeheaven lint $(source_dir) tests
 
 mypy:
-	poetry run mypy $(source_dir)
+	poetry run mypy $(source_dir) tests
 
 lint: isort black flake mypy
 
