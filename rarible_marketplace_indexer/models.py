@@ -92,5 +92,5 @@ async def signal_post_save(
     producer = ProducerContainer.get_instance()
     producer.send(
         topic=KafkaTopic.ORDER_TOPIC,
-        value=OrderFactory.build(instance),
+        value=OrderFactory.build(instance).json().encode(),
     )
