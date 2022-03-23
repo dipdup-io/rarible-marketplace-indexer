@@ -1,5 +1,5 @@
 custom:
   enabled: true
-  kafka_address: ${KAFKA_URL}
+  kafka_address: ${KAFKA_URL:-}
   client_id: dipdup-rarible-mainnet-producer
   retries: 5
