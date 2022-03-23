@@ -1,82 +1,21 @@
-datasources:
-  tzkt_mainnet:
-    kind: tzkt
-    url: https://api.tzkt.io
+database:
+  kind: postgres
+  host: db
+  port: 5432
+  user: ${POSTGRES_USER:-dipdup}
+  password: ${POSTGRES_PASSWORD:-changeme}
+  database: ${POSTGRES_DB:-dipdup}
 
-contracts:
-  hen_mainnet:
-    address: KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn
-    typename: hen_marketplace
+hasura:
+  url: http://hasura:8080
+  admin_secret: ${ADMIN_SECRET:-changeme}
+  select_limit: ${SELECT_LIMIT:-1000}
+  camel_case: true
+  allow_aggregations: false
+  rest: true
 
-  objkt_mainnet:
-    address: KT1FvqJwEDWb1Gwc55Jd1jjTHRVWbYKUUpyq
-    typename: objkt_marketplace
-
-  objkt_v2_mainnet:
-    address: KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC
-    typename: objkt_marketplace_v2
-
-indexes:
-  hen_actions:
-    kind: operation
-    datasource: tzkt_mainnet
-    contracts:
-      - hen_mainnet
-    handlers:
-      - callback: hen_order_list
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: swap
-
-      - callback: hen_order_cancel_list
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: cancel_swap
-
-      - callback: hen_order_match
-        pattern:
-          - destination: hen_mainnet
-            entrypoint: collect
-
-  objkt_actions:
-    kind: operation
-    datasource: tzkt_mainnet
-    contracts:
-      - objkt_mainnet
-    handlers:
-      - callback: objkt_order_list
-        pattern:
-          - destination: objkt_mainnet
-            entrypoint: ask
-
-      - callback: objkt_order_cancel_list
-        pattern:
-          - destination: objkt_mainnet
-            entrypoint: retract_ask
-
-      - callback: objkt_order_match
-        pattern:
-          - destination: objkt_mainnet
-            entrypoint: fulfill_ask
-
-  objkt_v2_actions:
-    kind: operation
-    datasource: tzkt_mainnet
-    contracts:
-      - objkt_v2_mainnet
-    handlers:
-      - callback: objkt_v2_order_list
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: ask
-
-      - callback: objkt_v2_order_cancel_list
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: retract_ask
-
-      - callback: objkt_v2_order_match
-        pattern:
-          - destination: objkt_v2_mainnet
-            entrypoint: fulfill_ask
-
+custom:
+  enabled: true
+  kafka_address: ${KAFKA_URL}
+  client_id: dipdup-rarible-mainnet-producer
+  retries: 5
