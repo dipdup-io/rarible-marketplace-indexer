@@ -51,8 +51,8 @@ class Xtz(AssetValue):
 
 
 class AssetValueField(DecimalField):
-    tezos_precision: int = AssetValue.tezos_precision
-    max_digits: int = 16
+    tezos_precision: int = 36
+    max_digits: int = 96
 
     skip_to_python_if_native = False
 
