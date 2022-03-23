@@ -5,7 +5,7 @@ services:
     build: .
     depends_on:
       - db
-    command: [ "-c", "dipdup.yml", "-c", "dipdup.${RARIBLE_ENV:-hangzhounet}.yml", "run" ]
+    command: [ "-c", "dipdup.yml", "-c", "dipdup.${RARIBLE_ENV:-mainnet}.yml", "run" ]
     restart: "no"
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}

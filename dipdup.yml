@@ -2,8 +2,19 @@ spec_version: 1.2
 package: rarible_marketplace_indexer
 
 database:
-  kind: sqlite
-  path: db.sqlite3
+  kind: postgres
+  host: db
+  port: 5432
+  user: ${POSTGRES_USER:-dipdup}
+  password: ${POSTGRES_PASSWORD:-changeme}
+  database: ${POSTGRES_DB:-dipdup}
+
+hasura:
+  url: http://hasura:8080
+  admin_secret: ${ADMIN_SECRET:-changeme}
+  select_limit: ${SELECT_LIMIT:-1000}
+  allow_aggregations: false
+  rest: true
 
 custom:
   enabled: false
