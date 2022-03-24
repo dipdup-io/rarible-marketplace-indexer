@@ -11,7 +11,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - ADMIN_SECRET=${ADMIN_SECRET:-changeme}
-      - KAFKA_URL=kafka0:9094
+      - KAFKA_URL=kafka0:9092
       - KAFKA_ENABLED=true
 
   db:
