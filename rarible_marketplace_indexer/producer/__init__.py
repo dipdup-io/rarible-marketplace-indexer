@@ -20,6 +20,10 @@ class ProducerContainer:
                 bootstrap_servers=[config.kafka_address],  # noqa
                 client_id=config.client_id,  # noqa
                 retries=config.retries,  # noqa
+                security_protocol='SASL_PLAINTEXT',
+                sasl_mechanism='PLAIN',
+                sasl_plain_username='rarible',
+                sasl_plain_password='changeme'
             )
         else:
             producer = NullKafkaProducer()

@@ -5,12 +5,13 @@ services:
     build: .
     depends_on:
       - db
+      - kafka0
     command: [ "-c", "dipdup.yml", "-c", "dipdup.${RARIBLE_ENV:-mainnet}.yml", "-c", "dipdup.prod.yml", "run" ]
     restart: "no"
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - ADMIN_SECRET=${ADMIN_SECRET:-changeme}
-      - KAFKA_URL=kafka0:9092
+      - KAFKA_URL=kafka0:9094
       - KAFKA_ENABLED=true
 
   db:
@@ -59,14 +60,22 @@ services:
       - zookeeper0
     image: confluentinc/cp-kafka:7.0.1
     environment:
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka0:9092,OUTSIDE://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka0:9092,EXTERNAL://kafka0:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_EXTERNAL_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="rarible" \
+        password="changeme" \
+        user_rarible="changeme"; \
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: zookeeper0:2181
       KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      ZOOKEEPER_SASL_ENABLED: "false"
       KAFKA_BROKER_ID: 1
-      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: "DEBUG"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=DEBUG,kafka.producer.async.DefaultEventHandler=DEBUG,state.change.logger=DEBUG"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -74,8 +83,6 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
     volumes:
       - kafka-data:/var/lib/kafka/data
-    ports:
-      - "127.0.0.1:9092:9092"
 
   kafdrop:
     depends_on:
@@ -84,6 +91,7 @@ services:
     environment:
       KAFKA_BROKERCONNECT: "kafka0:9092"
       JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      CMD_ARGS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_client_jaas.conf"
     ports:
       - "127.0.0.1:9000:9000"
 
