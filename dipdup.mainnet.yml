@@ -1,7 +1,7 @@
 datasources:
   tzkt_mainnet:
     kind: tzkt
-    url: https://api.tzkt.io
+    url: ${TZKT_URL:-https://api.tzkt.io}
 
 contracts:
   hen_mainnet:
