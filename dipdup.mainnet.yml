@@ -80,3 +80,10 @@ indexes:
           - destination: objkt_v2_mainnet
             entrypoint: fulfill_ask
 
+advanced:
+  reindex:
+    manual: wipe
+    migration: exception
+    rollback: exception
+    config_modified: ignore
+    schema_modified: ignore
