@@ -91,7 +91,6 @@ services:
     environment:
       KAFKA_BROKERCONNECT: "kafka0:9092"
       JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
-      CMD_ARGS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_client_jaas.conf"
     ports:
       - "127.0.0.1:9000:9000"
 
