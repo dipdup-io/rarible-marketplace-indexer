@@ -45,6 +45,7 @@ class AbstractListAction(ActionInterface):
             dto.started_at = transaction.data.timestamp
 
         await Activity.create(
+            id=transaction.data.id,
             type=ActivityTypeEnum.LIST,
             network=datasource.network,
             platform=cls.platform,
@@ -60,13 +61,15 @@ class AbstractListAction(ActionInterface):
         )
 
         await Order.create(
+            id=transaction.data.id,
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,
             status=StatusEnum.ACTIVE,
             started_at=dto.started_at,
-            ended_at=None,
+            ended_at=dto.ended_at,
             make_stock=dto.amount,
+            salt=transaction.data.counter,
             created_at=transaction.data.timestamp,
             last_updated_at=transaction.data.timestamp,
             make_price=dto.object_price,
@@ -107,6 +110,7 @@ class AbstractCancelAction(ActionInterface):
         last_order_activity._custom_generated_pk = False
         cancel_activity = last_order_activity.clone()
 
+        cancel_activity.id = transaction.data.id
         cancel_activity.operation_level = transaction.data.level
         cancel_activity.operation_timestamp = transaction.data.timestamp
         cancel_activity.operation_hash = transaction.data.hash
@@ -174,6 +178,7 @@ class AbstractMatchAction(ActionInterface):
         last_list_activity._custom_generated_pk = False
         match_activity = last_list_activity.clone()
 
+        match_activity.id = transaction.data.id
         match_activity.operation_level = transaction.data.level
         match_activity.operation_timestamp = transaction.data.timestamp
         match_activity.operation_hash = transaction.data.hash

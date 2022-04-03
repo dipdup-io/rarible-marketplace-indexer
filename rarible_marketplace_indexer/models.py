@@ -43,6 +43,7 @@ class Activity(Model):
     platform = fields.CharEnumField(PlatformEnum)
     internal_order_id = fields.CharField(max_length=32, index=True)
     maker = AccountAddressField()
+    taker = AccountAddressField(null=True)
     contract = AccountAddressField()
     token_id = fields.TextField()
     amount = AssetValueField()
@@ -66,10 +67,12 @@ class Order(Model):
     ended_at = fields.DatetimeField(null=True)
     make_stock = AssetValueField()
     cancelled = fields.BooleanField(default=False)
+    salt = fields.BigIntField()
     created_at = fields.DatetimeField(index=True)
     last_updated_at = fields.DatetimeField(index=True)
     make_price = XtzField()
     maker = AccountAddressField()
+    taker = AccountAddressField(null=True)
     make_contract = AccountAddressField()
     make_token_id = fields.TextField()
     make_value = AssetValueField()
@@ -80,7 +83,7 @@ class Order(Model):
 
 
 @post_save(Order)
-async def signal_post_save(
+async def signal_order_post_save(
     sender: Order,
     instance: Order,
     created: bool,
@@ -92,5 +95,22 @@ async def signal_post_save(
     producer = ProducerContainer.get_instance()
     producer.send(
         topic=KafkaTopic.ORDER_TOPIC,
-        value=OrderFactory.build(instance).json().encode(),
+        value=OrderFactory.for_kafka(instance),
+    )
+
+
+@post_save(Activity)
+async def signal_activity_post_save(
+    sender: Activity,
+    instance: Activity,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
+) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.api_activity import ActivityFactory
+
+    producer = ProducerContainer.get_instance()
+    producer.send(
+        topic=KafkaTopic.ACTIVITY_TOPIC,
+        value=ActivityFactory.for_kafka(instance),
     )

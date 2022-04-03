@@ -1,5 +1,7 @@
+from decimal import Context
 from decimal import Decimal
 from decimal import InvalidOperation
+from functools import total_ordering
 from typing import Any
 from typing import Optional
 from typing import Sequence
@@ -13,13 +15,16 @@ from tortoise.fields import DecimalField
 DecimalNew = Union[Decimal, float, str, Tuple[int, Sequence[int], int]]
 
 
+@total_ordering
 class AssetValue(Decimal):
-    tezos_precision_mask: str = '1.000001'
-    tezos_precision: int = 6
+    asset_max_digits = 96
+    asset_precision: int = 36
 
     def __new__(cls, value: DecimalNew):
+        ctx = Context(prec=cls.asset_max_digits + cls.asset_precision)
+        asset_precision_mask: str = '1.' + '0' * (cls.asset_precision - 1) + '1'
         try:
-            value = Decimal(value).quantize(Decimal(cls.tezos_precision_mask)).normalize()
+            value = Decimal(value).quantize(Decimal(asset_precision_mask), context=ctx).normalize()
         except InvalidOperation:
             # covered in tests.asset.test_xtz.TestXtz.test_too_many_digits
             value = 0
@@ -30,7 +35,7 @@ class AssetValue(Decimal):
         return f'{self:f}'
 
     def __repr__(self) -> str:
-        return str(self)
+        return f'{self.__class__.__name__}({self})'
 
     def __eq__(self, other: DecimalNew) -> bool:
         cls = type(self)
@@ -38,33 +43,38 @@ class AssetValue(Decimal):
             other = cls(other)
         return self.compare(other) == 0
 
+    def __lt__(self, other):
+        cls = type(self)
+        if not isinstance(other, cls):
+            other = cls(other)
+        return self.compare(other) == -1
+
 
 class Xtz(AssetValue):
-    def __repr__(self) -> str:
-        return f'{self:f} ꜩ'
+    asset_max_digits = 36
+    asset_precision: int = 6
 
     @staticmethod
     def from_u_tezos(value: DecimalNew):
-        value = Decimal(value) / 1000000
+        value = Decimal(value) / 1_000_000
 
         return Xtz(value)
 
 
 class AssetValueField(DecimalField):
-    tezos_precision: int = 36
-    max_digits: int = 96
+    python_class: Type[AssetValue] = AssetValue
+    max_digits: int
 
     skip_to_python_if_native = False
 
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__(self.max_digits, self.tezos_precision, **kwargs)
+        self.max_digits = self.python_class.asset_max_digits
+        super().__init__(self.max_digits, self.python_class.asset_precision, **kwargs)
 
     def to_python_value(self, value: Any) -> Optional[Decimal]:
 
-        if value is None:
-            value = None
-        else:
-            value = AssetValue(value)
+        if value is not None:
+            value = self.python_class(value)
         self.validate(value)
         return value
 
@@ -75,11 +85,4 @@ class AssetValueField(DecimalField):
 
 
 class XtzField(AssetValueField):
-    def to_python_value(self, value: Any) -> Optional[Decimal]:
-
-        if value is None:
-            value = None
-        else:
-            value = Xtz(value)
-        self.validate(value)
-        return value
+    python_class: Type[AssetValue] = Xtz

@@ -3,3 +3,8 @@ custom:
   kafka_address: ${KAFKA_URL:-}
   client_id: dipdup-rarible-mainnet-producer
   retries: 5
+  kafka_security_protocol: ${KAFKA_SECURITY_PROTOCOL:-SASL_PLAINTEXT},
+  sasl:
+    mechanism: ${KAFKA_SASL_MECHANISM:-PLAIN},
+    username: ${KAFKA_USERNAME:-rarible},
+    password: ${KAFKA_PASSWORD:-changeme}

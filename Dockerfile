@@ -32,6 +32,11 @@ RUN apt-get update \
         # deps for building python deps
         build-essential \
         git \
+        # deps for building pytezos deps
+        pkg-config \
+        libsodium-dev \
+        libsecp256k1-dev \
+        libgmp-dev \
     \
     # install poetry
  && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - \

@@ -6,8 +6,10 @@ authors = ["Igor Sereda <sereda.igor.s@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "~3.10"
 dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "tmp/rarible-indexer"}
+pytezos = {git = "https://github.com/baking-bad/pytezos.git", branch = "master"}
+
 kafka-python = "^2.0.2"
 
 [tool.poetry.dev-dependencies]

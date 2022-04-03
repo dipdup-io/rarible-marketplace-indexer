@@ -18,6 +18,7 @@ class ListDto:
     amount: AssetValue
     object_price: Xtz
     started_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
+    ended_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
 
 
 @dataclass

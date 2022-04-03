@@ -17,39 +17,41 @@ class TestXtz:
     def test_precision(self, valid_tezos_value):
         assert abs(valid_tezos_value) > 0
 
-    def test_equation(self, valid_tezos_value):
-        assert valid_tezos_value == float(valid_tezos_value)
-        assert valid_tezos_value == str(valid_tezos_value)
-
     @pytest.mark.parametrize('not_of_value', (0.000_000_1, 1e-7, -0.000_000_1, -1e-7))
     def test_precision_negative(self, not_of_value):
         assert Xtz(not_of_value) == 0
 
+    def test_equation(self, valid_tezos_value):
+        assert valid_tezos_value == float(valid_tezos_value)
+        assert valid_tezos_value == str(valid_tezos_value)
+
     @pytest.mark.parametrize(
-        'value, expected_repr',
+        'value, expected_str',
         (
-            (-42, '-42 ꜩ'),
-            (0, '0 ꜩ'),
-            (0.000, '0 ꜩ'),
-            (13, '13 ꜩ'),
-            (100.000001, '100.000001 ꜩ'),
-            (-100.000001, '-100.000001 ꜩ'),
-            (000.000001, '0.000001 ꜩ'),
-            (-000.000001, '-0.000001 ꜩ'),
-            (000.0000001, '0 ꜩ'),
-            (1e3, '1000 ꜩ'),
+            (-42, '-42'),
+            (0, '0'),
+            (0.000, '0'),
+            (13, '13'),
+            (100.000001, '100.000001'),
+            (-100.000001, '-100.000001'),
+            (000.000001, '0.000001'),
+            (-000.000001, '-0.000001'),
+            (000.0000001, '0'),
+            (1e3, '1000'),
         ),
     )
-    def test_repr(self, value, expected_repr):
+    def test_str(self, value, expected_str):
         xtz = Xtz(value)
-        assert repr(xtz) == expected_repr
+        assert str(xtz) == expected_str
 
     @pytest.mark.parametrize(
         'utz_value, expected',
         (
             (127001, '0.127001'),
+            (127001.10, '0.127001'),
             (30_000_000, '30'),
             (500_000_000, '500'),
+            ('500_000_000', '500'),
         ),
     )
     def test_from_u_tezos(self, utz_value, expected):
