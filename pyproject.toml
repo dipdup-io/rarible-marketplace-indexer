@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "~3.10"
-dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "tmp/rarible-indexer"}
+dipdup = "^5.0.0"
 pytezos = {git = "https://github.com/baking-bad/pytezos.git", branch = "master"}
 
 kafka-python = "^2.0.2"

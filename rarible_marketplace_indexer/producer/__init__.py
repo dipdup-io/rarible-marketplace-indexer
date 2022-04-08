@@ -1,6 +1,7 @@
+from typing import Any
+from typing import Dict
 from typing import Union
 
-from dipdup.config import CustomConfig
 from kafka import KafkaProducer
 
 
@@ -14,16 +15,16 @@ class ProducerContainer:
         return cls.__instance
 
     @classmethod
-    def create_instance(cls, config: CustomConfig) -> None:
-        if config.enabled != 'false':  # noqa
+    def create_instance(cls, config: Dict[str, Any]) -> None:
+        if config['enabled'] != 'false':
             producer = KafkaProducer(
-                bootstrap_servers=[config.kafka_address],  # noqa
-                client_id=config.client_id,  # noqa
-                retries=config.retries,  # noqa
-                security_protocol=config.kafka_security_protocol,  # noqa
-                sasl_mechanism=config.sasl['mechanism'],  # noqa
-                sasl_plain_username=config.sasl['username'],  # noqa
-                sasl_plain_password=config.sasl['password'],  # noqa
+                bootstrap_servers=[config['kafka_address']],
+                client_id=config['client_id'],
+                retries=config['retries'],
+                security_protocol=config['kafka_security_protocol'],
+                sasl_mechanism=config['sasl']['mechanism'],
+                sasl_plain_username=config['sasl']['username'],
+                sasl_plain_password=config['sasl']['password'],
             )
         else:
             producer = NullKafkaProducer()

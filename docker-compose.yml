@@ -11,8 +11,12 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - ADMIN_SECRET=${ADMIN_SECRET:-changeme}
-      - KAFKA_URL=kafka0:9092
+      - KAFKA_URL=kafka0:9094
       - KAFKA_ENABLED=true
+      - KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_SASL_MECHANISM=PLAIN
+      - KAFKA_USERNAME=rarible
+      - KAFKA_PASSWORD=changeme
 
   db:
     image: postgres:12
