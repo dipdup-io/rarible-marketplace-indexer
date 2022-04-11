@@ -23,7 +23,7 @@ class RaribleApiOrder(BaseModel):
     started_at: datetime
     ended_at: Optional[datetime]
     make_stock: AssetValue
-    canceled: bool
+    cancelled: bool
     created_at: datetime
     last_updated_at: datetime
     make_price: Xtz
@@ -49,7 +49,7 @@ class OrderFactory:
             started_at=order.started_at,
             ended_at=order.ended_at,
             make_stock=order.make_stock,
-            canceled=order.cancelled,
+            cancelled=order.cancelled,
             created_at=order.created_at,
             last_updated_at=order.last_updated_at,
             make_price=order.make_price,
@@ -65,7 +65,3 @@ class OrderFactory:
             ),
             salt=order.salt,
         )
-
-    @classmethod
-    def for_kafka(cls, order: Order) -> bytes:
-        return cls.build(order).json(by_alias=True).encode()

@@ -36,7 +36,7 @@ class XtzAssetType(AssetType):
 class AbstractTokenAssetType(AssetType):
     asset_class: AssetClassEnum
     contract: OriginatedAccountAddress
-    token_id: int
+    token_id: str
 
 
 class FungibleTokenAssetType(AbstractTokenAssetType):
@@ -52,5 +52,10 @@ class MultiTokenAssetType(AbstractTokenAssetType):
 
 
 class Asset(BaseModel):
+    class Config:
+        json_encoders = {
+            AssetValue: str,
+        }
+
     type: AssetType
     value: AssetValue

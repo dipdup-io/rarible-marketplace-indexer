@@ -56,7 +56,7 @@ class RaribleApiCancelActivity(AbstractRaribleApiActivity):
     take: Asset
 
 
-RaribleApiActivity = Union[RaribleApiListActivity, RaribleApiMatchActivity]
+RaribleApiActivity = Union[RaribleApiListActivity, RaribleApiMatchActivity, RaribleApiCancelActivity]
 
 
 class ActivityFactory:
@@ -127,12 +127,6 @@ class ActivityFactory:
         )
 
     @classmethod
-    def build(cls, activity: Activity) -> RaribleApiActivity:
-        factory_method = cls._get_factory_method(activity)
-
-        return factory_method(activity)
-
-    @classmethod
     def _get_factory_method(cls, activity: Activity) -> callable:
         method_map: Dict[ActivityTypeEnum, Callable[[Activity], callable]] = {
             ActivityTypeEnum.LIST: cls._build_list_activity,
@@ -143,5 +137,7 @@ class ActivityFactory:
         return method_map.get(activity.type, cls._build_list_activity)
 
     @classmethod
-    def for_kafka(cls, activity: Activity) -> bytes:
-        return cls.build(activity).json(by_alias=True).encode()
+    def build(cls, activity: Activity) -> RaribleApiActivity:
+        factory_method = cls._get_factory_method(activity)
+
+        return factory_method(activity)

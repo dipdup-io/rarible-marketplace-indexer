@@ -184,6 +184,7 @@ class AbstractMatchAction(ActionInterface):
         match_activity.operation_hash = transaction.data.hash
 
         match_activity.type = ActivityTypeEnum.MATCH
+        match_activity.taker = transaction.data.sender_address
         match_activity.amount = dto.match_amount
         await match_activity.save()
 
