@@ -93,9 +93,9 @@ async def signal_order_post_save(
     from rarible_marketplace_indexer.types.rarible_api_objects.api_order import OrderFactory
 
     producer = ProducerContainer.get_instance()
-    producer.send(
+    await producer.send(
         topic=KafkaTopic.ORDER_TOPIC,
-        value=OrderFactory.for_kafka(instance),
+        value=OrderFactory.build(instance),
     )
 
 
@@ -110,7 +110,7 @@ async def signal_activity_post_save(
     from rarible_marketplace_indexer.types.rarible_api_objects.api_activity import ActivityFactory
 
     producer = ProducerContainer.get_instance()
-    producer.send(
+    await producer.send(
         topic=KafkaTopic.ACTIVITY_TOPIC,
-        value=ActivityFactory.for_kafka(instance),
+        value=ActivityFactory.build(instance),
     )

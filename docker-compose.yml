@@ -2,7 +2,10 @@ version: "3.8"
 
 services:
   indexer:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rarible_indexer:dev
     depends_on:
       - db
       - kafka0
