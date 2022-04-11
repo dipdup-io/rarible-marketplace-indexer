@@ -14,7 +14,7 @@ aiokafka = "^0.7.2"
 
 [tool.poetry.group.dev.dependencies]
 ssort = "^0.11.5"
-mypy = "^0.941"
+mypy = "^0.942"
 isort = "^5.10.1"
 flakeheaven = "^0.11.1"
 pytest = "^7.1.1"
@@ -26,6 +26,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.isort]
 line_length = 140
 force_single_line = true
+group_by_package = true
+ensure_newline_before_comments = true
 
 [tool.black]
 line-length = 140
