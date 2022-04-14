@@ -2,7 +2,7 @@ from typing import Type
 
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValueField
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.base_value import BaseValue
-from rarible_marketplace_indexer.types.tezos_objects.asset_value.base_value import DecimalNew
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.value_metaclass import DecimalNew
 
 
 class Xtz(BaseValue):

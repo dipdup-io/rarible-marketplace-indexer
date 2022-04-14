@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Literal
 from typing import Union
 
-from humps import camelize
+from humps.main import camelize
 from pydantic import BaseModel
 from pydantic import Field
 from typing_extensions import Annotated

@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import pytest
 
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress

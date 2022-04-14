@@ -2,7 +2,6 @@ from decimal import Decimal
 
 import pytest
 
-from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 
 
@@ -59,7 +58,11 @@ class TestXtz:
         assert xtz >= expected
 
     def test_arithmetic(self):
-        assert (Xtz(5) * AssetValue(3) + Xtz(35)) == 50
+        assert Xtz(1.0000011) - Xtz(1.000001) == 0
+        assert Xtz(0.000004) / 7 > 0
+        assert Xtz(0.000003) / 7 == 0
+        assert Xtz(18).sqrt() == '4.242641'
+        assert (Xtz(5) * 3 + Xtz(35)) == 50
 
     def test_too_many_digits(self):
         """
