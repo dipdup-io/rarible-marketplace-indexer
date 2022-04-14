@@ -12,7 +12,7 @@ from rarible_marketplace_indexer.models import Activity
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import Order
 from rarible_marketplace_indexer.models import StatusEnum
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 
 
 class ActionInterface(ABC):

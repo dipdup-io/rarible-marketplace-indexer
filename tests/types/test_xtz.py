@@ -2,8 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValue
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 
 
 class TestXtz:
@@ -56,7 +56,7 @@ class TestXtz:
     )
     def test_from_u_tezos(self, utz_value, expected):
         xtz = Xtz.from_u_tezos(utz_value)
-        assert xtz == expected
+        assert xtz >= expected
 
     def test_arithmetic(self):
         assert (Xtz(5) * AssetValue(3) + Xtz(35)) == 50

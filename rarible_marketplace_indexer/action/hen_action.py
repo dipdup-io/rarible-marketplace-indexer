@@ -12,8 +12,8 @@ from rarible_marketplace_indexer.types.hen_marketplace.parameter.cancel_swap imp
 from rarible_marketplace_indexer.types.hen_marketplace.parameter.collect import CollectParameter
 from rarible_marketplace_indexer.types.hen_marketplace.parameter.swap import SwapParameter
 from rarible_marketplace_indexer.types.hen_marketplace.storage import HenMarketplaceStorage
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValue
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 

@@ -3,8 +3,8 @@ from typing import Optional
 
 from pydantic.dataclasses import dataclass
 
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValue
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
