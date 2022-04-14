@@ -1,5 +1,6 @@
 ARG PYTHON_VERSION=3.10
 ARG SOURCE_DIR=rarible_marketplace_indexer
+ARG POETRY_PREVIEW=1
 ARG POETRY_PATH=/opt/poetry
 ARG VENV_PATH=/opt/venv
 ARG APP_PATH=/opt/app
@@ -20,9 +21,12 @@ FROM python:${PYTHON_VERSION}-slim-buster as builder-base
 
 ARG VENV_PATH
 ARG POETRY_PATH
+ARG POETRY_PREVIEW
 ENV PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
+    POETRY_HOME="$POETRY_PATH" \
+    VIRTUAL_ENV=$VENV_PATH \
     PATH="$POETRY_PATH/bin:$VENV_PATH/bin:$PATH"
 
 RUN apt-get update \
@@ -39,22 +43,27 @@ RUN apt-get update \
         libgmp-dev \
     \
     # install poetry
- && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - \
- && mv $HOME/.poetry $POETRY_PATH \
- && poetry --version \
+ && curl -sSL https://install.python-poetry.org | python - \
     \
     # configure poetry & make a virtualenv ahead of time since we only need one
  && python -m venv $VENV_PATH \
  && poetry config virtualenvs.create false \
     \
     # cleanup
+ && rm -rf /tmp \
+ && rm -rf /root/.cache \
+ && rm -rf `find /usr/local/lib $POETRY_PATH/venv/lib $VENV_PATH/lib -name __pycache__` \
  && rm -rf /var/lib/apt/lists/*
 
 FROM builder-base as builder-production
 
 COPY ["poetry.lock", "pyproject.toml", "./"]
 
-RUN poetry install --no-dev --no-interaction --no-ansi -vvv
+RUN poetry install --without dev --sync --no-interaction --no-ansi -vvv \
+ && rm -rf /tmp \
+ && rm -rf /root/.cache \
+ && rm -rf $VIRTUAL_ENV/src \
+ && rm -rf `find $VIRTUAL_ENV/lib -name __pycache__`
 
 FROM runtime-base as runtime
 
