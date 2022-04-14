@@ -65,7 +65,6 @@ decimal_return_methods = (
     'shift',
     '__copy__',
     '__deepcopy__',
-    '_rescale',
 )
 decimal_comparison_methods = (
     '__eq__',
@@ -101,10 +100,10 @@ class CustomDecimalMetaClass(type):
     @staticmethod
     def other_decorator(method):
         @wraps(method)
-        def wrapper(self, other, context=None):
+        def wrapper(self, other):
             if not isinstance(other, self.__class__):
                 other = self.__class__(other)
-            result = method(self, other, context=context)
+            result = method(self, other)
             return result
 
         return wrapper

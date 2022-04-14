@@ -31,6 +31,7 @@ class ActivityFactory:
     def _build_match_activity(cls, activity: Activity) -> RaribleApiMatchActivity:
         return RaribleApiMatchActivity(
             id=activity.id,
+            network=activity.network,
             nft=Asset.make_from_model(activity),
             payment=Asset.take_from_model(activity),
             buyer=ImplicitAccountAddress(activity.taker),
@@ -45,6 +46,7 @@ class ActivityFactory:
     def _build_cancel_activity(cls, activity: Activity) -> RaribleApiCancelActivity:
         return RaribleApiCancelActivity(
             id=activity.id,
+            network=activity.network,
             maker=ImplicitAccountAddress(activity.maker),
             make=Asset.make_from_model(activity),
             take=Asset.take_from_model(activity),

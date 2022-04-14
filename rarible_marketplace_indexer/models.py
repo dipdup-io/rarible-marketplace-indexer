@@ -7,8 +7,6 @@ from tortoise.backends.base.client import BaseDBAsyncClient
 from tortoise.models import Model
 from tortoise.signals import post_save
 
-from rarible_marketplace_indexer.producer.const import KafkaTopic
-from rarible_marketplace_indexer.producer.container import ProducerContainer
 from rarible_marketplace_indexer.producer.helper import producer_send
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValueField
@@ -42,6 +40,8 @@ class Activity(Model):
     class Meta:
         table = 'marketplace_activity'
 
+    _custom_generated_pk = True
+
     id = fields.BigIntField(pk=True)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
@@ -67,6 +67,8 @@ class Activity(Model):
 class Order(Model):
     class Meta:
         table = 'marketplace_order'
+
+    _custom_generated_pk = True
 
     id = fields.BigIntField(pk=True, generated=False)
     network = fields.CharField(max_length=16, index=True)
