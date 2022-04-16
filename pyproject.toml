@@ -6,12 +6,15 @@ authors = ["Igor Sereda <sereda.igor.s@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "tmp/rarible-indexer"}
-kafka-python = "^2.0.2"
+python = "~3.10"
+dipdup = "^5.0.0"
+pytezos = {git = "https://github.com/baking-bad/pytezos.git", branch = "master"}
 
-[tool.poetry.dev-dependencies]
-mypy = "^0.941"
+aiokafka = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+ssort = "^0.11.5"
+mypy = "^0.942"
 isort = "^5.10.1"
 flakeheaven = "^0.11.1"
 pytest = "^7.1.1"
@@ -23,6 +26,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.isort]
 line_length = 140
 force_single_line = true
+group_by_package = true
+ensure_newline_before_comments = true
 
 [tool.black]
 line-length = 140

@@ -1,12 +1,14 @@
-from decimal import Decimal
-
 import pytest
 
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 
-class TestAddressXtz:
+class EnvironmentAwareMixin:
+    pass
+
+
+class TestAddressXtz(EnvironmentAwareMixin):
     @pytest.fixture(
         params=(
             'tz1QGCWjNpYmcS6T9qFGYSam25e36WeFUCK4',

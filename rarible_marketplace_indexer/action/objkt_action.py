@@ -12,8 +12,8 @@ from rarible_marketplace_indexer.types.objkt_marketplace.parameter.ask import As
 from rarible_marketplace_indexer.types.objkt_marketplace.parameter.fulfill_ask import FulfillAskParameter
 from rarible_marketplace_indexer.types.objkt_marketplace.parameter.retract_ask import RetractAskParameter
 from rarible_marketplace_indexer.types.objkt_marketplace.storage import ObjktMarketplaceStorage
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValue
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 

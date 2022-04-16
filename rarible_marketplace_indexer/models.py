@@ -2,20 +2,20 @@ from enum import Enum
 from typing import List
 from typing import Optional
 
-from tortoise import BaseDBAsyncClient
-from tortoise import Model
 from tortoise import fields
+from tortoise.backends.base.client import BaseDBAsyncClient
+from tortoise.models import Model
 from tortoise.signals import post_save
 
-from rarible_marketplace_indexer.const import KafkaTopic
-from rarible_marketplace_indexer.producer import ProducerContainer
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import AssetValueField
-from rarible_marketplace_indexer.types.tezos_objects.tezos_currency import XtzField
+from rarible_marketplace_indexer.producer.helper import producer_send
+from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValueField
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import XtzField
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import AccountAddressField
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHashField
 
 
-class StatusEnum(Enum):
+class OrderStatusEnum(Enum):
     ACTIVE: str = 'ACTIVE'
     FILLED: str = 'FILLED'
     HISTORICAL: str = 'HISTORICAL'
@@ -24,9 +24,9 @@ class StatusEnum(Enum):
 
 
 class ActivityTypeEnum(Enum):
-    LIST: str = 'list'
-    CANCEL: str = 'cancel'
-    MATCH: str = 'match'
+    LIST: str = 'LIST'
+    MATCH: str = 'SELL'
+    CANCEL: str = 'CANCEL_LIST'
 
 
 class PlatformEnum(Enum):
@@ -37,60 +37,86 @@ class PlatformEnum(Enum):
 
 
 class Activity(Model):
+    class Meta:
+        table = 'marketplace_activity'
+
+    _custom_generated_pk = True
+
     id = fields.BigIntField(pk=True)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
     internal_order_id = fields.CharField(max_length=32, index=True)
     maker = AccountAddressField()
-    contract = AccountAddressField()
-    token_id = fields.TextField()
-    amount = AssetValueField()
+    taker = AccountAddressField(null=True)
     sell_price = XtzField()
+    make_asset_class = fields.CharEnumField(AssetClassEnum)
+    make_contract = AccountAddressField(null=True)
+    make_token_id = fields.TextField(null=True)
+    make_value = AssetValueField()
+    take_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
+    take_contract = AccountAddressField(null=True)
+    take_token_id = fields.TextField(null=True)
+    take_value = AssetValueField(null=True)
+
     operation_level = fields.IntField()
     operation_timestamp = fields.DatetimeField()
     operation_hash = OperationHashField()
 
-    class Meta:
-        table = 'marketplace_activity'
-
 
 class Order(Model):
-    id = fields.BigIntField(pk=True)
+    class Meta:
+        table = 'marketplace_order'
+
+    _custom_generated_pk = True
+
+    id = fields.BigIntField(pk=True, generated=False)
     network = fields.CharField(max_length=16, index=True)
     fill = XtzField(default=0)
     platform = fields.CharEnumField(PlatformEnum, index=True)
     internal_order_id = fields.CharField(max_length=32, index=True)
-    status = fields.CharEnumField(StatusEnum, index=True)
+    status = fields.CharEnumField(OrderStatusEnum, index=True)
     started_at = fields.DatetimeField()
     ended_at = fields.DatetimeField(null=True)
     make_stock = AssetValueField()
     cancelled = fields.BooleanField(default=False)
+    salt = fields.BigIntField()
     created_at = fields.DatetimeField(index=True)
     last_updated_at = fields.DatetimeField(index=True)
     make_price = XtzField()
     maker = AccountAddressField()
-    make_contract = AccountAddressField()
-    make_token_id = fields.TextField()
+    taker = AccountAddressField(null=True)
+    make_asset_class = fields.CharEnumField(AssetClassEnum)
+    make_contract = AccountAddressField(null=True)
+    make_token_id = fields.TextField(null=True)
     make_value = AssetValueField()
-
-    class Meta:
-        table = 'marketplace_order'
-        # unique_together = (("network", "contract", "token_id", "seller"),)
+    take_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
+    take_contract = AccountAddressField(null=True)
+    take_token_id = fields.TextField(null=True)
+    take_value = AssetValueField(null=True)
 
 
 @post_save(Order)
-async def signal_post_save(
+async def signal_order_post_save(
     sender: Order,
     instance: Order,
     created: bool,
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.api_order import OrderFactory
+    from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
 
-    producer = ProducerContainer.get_instance()
-    producer.send(
-        topic=KafkaTopic.ORDER_TOPIC,
-        value=OrderFactory.build(instance).json().encode(),
-    )
+    await producer_send(OrderFactory.build(instance))
+
+
+@post_save(Activity)
+async def signal_activity_post_save(
+    sender: Activity,
+    instance: Activity,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
+) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.activity.factory import ActivityFactory
+
+    await producer_send(ActivityFactory.build(instance))
