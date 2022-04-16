@@ -22,7 +22,7 @@ class ActivityFactory:
             maker=ImplicitAccountAddress(activity.maker),
             make=Asset.make_from_model(activity),
             take=Asset.take_from_model(activity),
-            price=Xtz.from_u_tezos(activity.sell_price),
+            price=Xtz(activity.sell_price),
             source=activity.platform,
             date=activity.operation_timestamp,
         )
@@ -36,7 +36,7 @@ class ActivityFactory:
             payment=Asset.take_from_model(activity),
             buyer=ImplicitAccountAddress(activity.taker),
             seller=ImplicitAccountAddress(activity.maker),
-            price=Xtz.from_u_tezos(activity.sell_price),
+            price=Xtz(activity.sell_price),
             source=activity.platform,
             hash=activity.operation_hash,
             date=activity.operation_timestamp,

@@ -1,7 +1,11 @@
+import uuid
 from enum import Enum
+from typing import Any
 from typing import List
 from typing import Optional
+from uuid import uuid5
 
+from dipdup.models import Transaction
 from tortoise import fields
 from tortoise.backends.base.client import BaseDBAsyncClient
 from tortoise.models import Model
@@ -42,7 +46,7 @@ class Activity(Model):
 
     _custom_generated_pk = True
 
-    id = fields.BigIntField(pk=True)
+    id = fields.UUIDField(pk=True, generated=False, required=True, default=None)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
@@ -62,7 +66,35 @@ class Activity(Model):
     operation_level = fields.IntField()
     operation_timestamp = fields.DatetimeField()
     operation_hash = OperationHashField()
+    operation_counter = fields.IntField()
+    operation_nonce = fields.IntField(null=True)
 
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(operation_hash, operation_counter, operation_nonce, *args, **kwargs):
+        assert operation_hash
+        assert operation_counter
+
+        oid = '.'.join(map(str, filter(bool, [operation_hash, operation_counter, operation_nonce])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
+    def apply(self, transaction: Transaction):
+        new_id = self.get_id(transaction.data.hash, transaction.data.counter, transaction.data.nonce)
+        activity = self.clone(pk=new_id)
+
+        activity.operation_level = transaction.data.level
+        activity.operation_timestamp = transaction.data.timestamp
+        activity.operation_hash = transaction.data.hash
+        activity.operation_counter = transaction.data.counter
+        activity.operation_nonce = transaction.data.nonce
+
+        return activity
 
 class Order(Model):
     class Meta:
@@ -70,7 +102,7 @@ class Order(Model):
 
     _custom_generated_pk = True
 
-    id = fields.BigIntField(pk=True, generated=False)
+    id = fields.UUIDField(pk=True, generated=False, required=True)
     network = fields.CharField(max_length=16, index=True)
     fill = XtzField(default=0)
     platform = fields.CharEnumField(PlatformEnum, index=True)
@@ -95,14 +127,30 @@ class Order(Model):
     take_token_id = fields.TextField(null=True)
     take_value = AssetValueField(null=True)
 
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(network, platform, internal_order_id, *args, **kwargs):
+        assert network
+        assert platform
+        assert internal_order_id
+
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
 
 @post_save(Order)
 async def signal_order_post_save(
-    sender: Order,
-    instance: Order,
-    created: bool,
-    using_db: "Optional[BaseDBAsyncClient]",
-    update_fields: List[str],
+        sender: Order,
+        instance: Order,
+        created: bool,
+        using_db: "Optional[BaseDBAsyncClient]",
+        update_fields: List[str],
 ) -> None:
     from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
 

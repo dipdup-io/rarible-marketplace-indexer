@@ -1,0 +1,26 @@
+{
+    "id": "76338082",
+    "fill": 0,
+    "platform": "Hen",
+    "status": "ACTIVE",
+    "startedAt": "2021-08-27T15:45:46+00:00",
+    "endedAt": null,
+    "makeStock": 1,
+    "cancelled": false,
+    "createdAt": "2021-08-27T15:45:46+00:00",
+    "lastUpdatedAt": "2021-08-27T15:45:46+00:00",
+    "makePrice": 3.98,
+    "maker": "tz1eiAZ7VvW96eK6VQAjPAMamYS2efQCN19z",
+    "network": "mainnet",
+    "taker": null,
+    "make": {
+        "assetType": {
+            "assetClass": "TEZOS_FT",
+            "contract": "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
+            "tokenId": "225413"
+        },
+        "assetValue": 1
+    },
+    "take": null,
+    "salt": 20511683
+}

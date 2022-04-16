@@ -5,7 +5,7 @@ from rarible_marketplace_indexer.types.tezos_objects.asset_value.base_value impo
 
 
 class AssetValue(BaseValue):
-    asset_max_digits: int = 96
+    asset_max_digits: int = 176
     asset_precision: int = 36
 
 

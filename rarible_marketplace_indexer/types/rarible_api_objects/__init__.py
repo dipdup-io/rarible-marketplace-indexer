@@ -1,4 +1,4 @@
-from typing import Any
+import uuid
 
 from humps.main import camelize
 from pydantic import BaseModel
@@ -12,8 +12,8 @@ class AbstractRaribleApiObject(BaseModel):
 
     _id_prefix = 'tezos'
     _kafka_topic: str
-    id: str
-    network: str = Field(exclude=True)
+    id: uuid.UUID
+    network: str
 
     @property
     def kafka_topic(self) -> str:

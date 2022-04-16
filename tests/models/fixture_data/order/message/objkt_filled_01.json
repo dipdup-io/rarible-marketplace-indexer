@@ -1,0 +1,30 @@
+{
+    "id": "106304437",
+    "fill": 35,
+    "platform": "Objkt",
+    "status": "FILLED",
+    "startedAt": "2021-10-18T18:13:24+00:00",
+    "endedAt": "2021-10-19T00:46:24+00:00",
+    "makeStock": 0,
+    "cancelled": false,
+    "createdAt": "2021-10-18T18:13:24+00:00",
+    "lastUpdatedAt": "2021-10-19T00:46:24+00:00",
+    "makePrice": 35,
+    "maker": "tz1aA45gD9gvBT34F4E5kDNnwxbXHMNsAgsL",
+    "taker": null,
+    "make": {
+        "assetType": {
+            "assetClass": "TEZOS_FT",
+            "contract": "KT1LbLNTTPoLgpumACCBFJzBEHDiEUqNxz5C",
+            "tokenId": "312"
+        },
+        "assetValue": 1
+    },
+    "take": {
+        "assetType": {
+            "assetClass": "XTZ"
+        },
+        "assetValue": 35
+    },
+    "salt": 15460491
+}

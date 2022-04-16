@@ -25,6 +25,7 @@ class ActionInterface(ABC):
         raise NotImplementedError
 
 
+
 class AbstractListAction(ActionInterface):
     @staticmethod
     @abstractmethod
@@ -46,7 +47,6 @@ class AbstractListAction(ActionInterface):
             dto.started_at = transaction.data.timestamp
 
         await Activity.create(
-            id=transaction.data.id,
             type=ActivityTypeEnum.LIST,
             network=datasource.network,
             platform=cls.platform,
@@ -60,10 +60,11 @@ class AbstractListAction(ActionInterface):
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
         )
 
         await Order.create(
-            id=transaction.data.id,
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,
@@ -109,11 +110,7 @@ class AbstractCancelAction(ActionInterface):
             .order_by('-operation_level')
             .first()
         )
-        cancel_activity = last_order_activity.clone(pk=transaction.data.id)
-
-        cancel_activity.operation_level = transaction.data.level
-        cancel_activity.operation_timestamp = transaction.data.timestamp
-        cancel_activity.operation_hash = transaction.data.hash
+        cancel_activity = last_order_activity.apply(transaction)
 
         cancel_activity.type = ActivityTypeEnum.CANCEL
         await cancel_activity.save()
@@ -177,11 +174,7 @@ class AbstractMatchAction(ActionInterface):
             .order_by('-operation_level')
             .first()
         )
-        match_activity = last_list_activity.clone(pk=transaction.data.id)
-
-        match_activity.operation_level = transaction.data.level
-        match_activity.operation_timestamp = transaction.data.timestamp
-        match_activity.operation_hash = transaction.data.hash
+        match_activity = last_list_activity.apply(transaction)
 
         match_activity.type = ActivityTypeEnum.MATCH
         match_activity.taker = transaction.data.sender_address

@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from typing import Any
 from typing import Sequence
 from typing import Union
@@ -14,6 +15,8 @@ class TezosObjectHash(str):
 
     @no_type_check
     def __new__(cls, address: str, **kwargs) -> 'TezosObjectHash':
+        if cls is TezosObjectHash:
+            raise NotImplementedError
         return str.__new__(cls, address)
 
     @classmethod
@@ -38,6 +41,11 @@ class OperationHash(TezosObjectHash):
 
 
 class AccountAddress(TezosObjectHash):
+    def __new__(cls, address: str, **kwargs) -> 'TezosObjectHash':
+        if cls is AccountAddress:
+            raise NotImplementedError
+        return super().__new__(cls, address, **kwargs)
+
     length: int = 36
 
 
