@@ -1,47 +1,42 @@
 from datetime import datetime
-from datetime import tzinfo
 from uuid import UUID
-from uuid import uuid4
 
 from pytz import UTC
 
-from rarible_marketplace_indexer.models import OrderStatusEnum
+from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import PlatformEnum
+from rarible_marketplace_indexer.types.rarible_api_objects.activity.activity import RaribleApiMatchActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import TokenAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import XtzAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import FungibleTokenAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import XtzAssetType
-from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
+from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHash
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
-order_object = RaribleApiOrder(
-    id=UUID('1fa0e1f7-24c1-5cfe-bec8-af34cc7d69c2'),
+activity_object = RaribleApiMatchActivity(
+    id=UUID('45b51339-c32e-56ab-a44f-66463b7d4fad'),
     network='mainnet',
-    fill=Xtz(9),
-    platform=PlatformEnum.HEN,
-    status=OrderStatusEnum.ACTIVE,
-    started_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
-    ended_at=None,
-    make_stock=AssetValue(291),
-    cancelled=False,
-    created_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
-    last_updated_at=datetime(2021, 8, 7, 15, 45, 46, tzinfo=UTC),
-    make_price=Xtz(1),
-    maker=ImplicitAccountAddress('tz2NY3Fgt5QufrYGP1JKdvLKcWWt86sLsqrS'),
-    taker=None,
-    make=TokenAsset(
+    type=ActivityTypeEnum.MATCH,
+    source=PlatformEnum.OBJKT,
+    order_id=UUID('1603ff55-2507-5cba-b50c-3ae50162c5ee'),
+    hash=OperationHash('oo4GwwjGX6RimeYBp68ddo1PS4aBc7ZpWDFmrqwZRcocnGykChm'),
+    date=datetime(2021, 7, 1, 21, 9, 38, tzinfo=UTC),
+    reverted=False,
+    nft=TokenAsset(
         asset_type=FungibleTokenAssetType(
             contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
-            token_id='49575',
+            token_id='157097',
         ),
-        asset_value=AssetValue(300),
+        asset_value=AssetValue(9),
     ),
-    take=XtzAsset(
+    payment=XtzAsset(
         asset_type=XtzAssetType(),
-        asset_value=Xtz(1),
+        asset_value=Xtz(3),
     ),
-    salt=1207026,
+    buyer=ImplicitAccountAddress('tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv'),
+    seller=ImplicitAccountAddress('tz1bn9ud4BmNGSCTWT86gB23ynR7tuWk8gAk'),
+    price=Xtz(3),
 )

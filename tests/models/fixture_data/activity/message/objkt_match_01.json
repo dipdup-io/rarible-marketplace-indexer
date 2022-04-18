@@ -1,0 +1,27 @@
+{
+   "id": "45b51339-c32e-56ab-a44f-66463b7d4fad",
+   "network": "mainnet",
+   "type": "SELL",
+   "source": "Objkt",
+   "orderId": "1603ff55-2507-5cba-b50c-3ae50162c5ee",
+   "hash": "oo4GwwjGX6RimeYBp68ddo1PS4aBc7ZpWDFmrqwZRcocnGykChm",
+   "date": "2021-07-01T21:09:38+00:00",
+   "reverted": false,
+   "nft": {
+      "assetType": {
+         "assetClass": "TEZOS_FT",
+         "contract": "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
+         "tokenId": "157097"
+      },
+      "assetValue": 9
+   },
+   "payment": {
+      "assetType": {
+         "assetClass": "XTZ"
+      },
+      "assetValue": 3
+   },
+   "buyer": "tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv",
+   "seller": "tz1bn9ud4BmNGSCTWT86gB23ynR7tuWk8gAk",
+   "price": 3
+}

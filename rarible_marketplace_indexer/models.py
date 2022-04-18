@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any
 from typing import List
 from typing import Optional
+from typing import TypeVar
 from uuid import uuid5
 
 from dipdup.models import Transaction
@@ -18,26 +19,28 @@ from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value impor
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import AccountAddressField
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHashField
 
-
-class OrderStatusEnum(Enum):
-    ACTIVE: str = 'ACTIVE'
-    FILLED: str = 'FILLED'
-    HISTORICAL: str = 'HISTORICAL'
-    INACTIVE: str = 'INACTIVE'
-    CANCELLED: str = 'CANCELLED'
+_StrEnumValue = TypeVar("_StrEnumValue")
 
 
-class ActivityTypeEnum(Enum):
-    LIST: str = 'LIST'
-    MATCH: str = 'SELL'
-    CANCEL: str = 'CANCEL_LIST'
+class OrderStatusEnum(str, Enum):
+    ACTIVE: _StrEnumValue = 'ACTIVE'
+    FILLED: _StrEnumValue = 'FILLED'
+    HISTORICAL: _StrEnumValue = 'HISTORICAL'
+    INACTIVE: _StrEnumValue = 'INACTIVE'
+    CANCELLED: _StrEnumValue = 'CANCELLED'
 
 
-class PlatformEnum(Enum):
-    HEN: str = 'Hen'
-    OBJKT: str = 'Objkt'
-    OBJKT_V2: str = 'Objkt_v2'
-    RARIBLE: str = 'Rarible'
+class ActivityTypeEnum(str, Enum):
+    LIST: _StrEnumValue = 'LIST'
+    MATCH: _StrEnumValue = 'SELL'
+    CANCEL: _StrEnumValue = 'CANCEL_LIST'
+
+
+class PlatformEnum(str, Enum):
+    HEN: _StrEnumValue = 'Hen'
+    OBJKT: _StrEnumValue = 'Objkt'
+    OBJKT_V2: _StrEnumValue = 'Objkt_v2'
+    RARIBLE: _StrEnumValue = 'Rarible'
 
 
 class Activity(Model):
@@ -47,6 +50,7 @@ class Activity(Model):
     _custom_generated_pk = True
 
     id = fields.UUIDField(pk=True, generated=False, required=True, default=None)
+    order_id = fields.UUIDField(required=True, index=True)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
@@ -95,6 +99,7 @@ class Activity(Model):
         activity.operation_nonce = transaction.data.nonce
 
         return activity
+
 
 class Order(Model):
     class Meta:
@@ -146,11 +151,11 @@ class Order(Model):
 
 @post_save(Order)
 async def signal_order_post_save(
-        sender: Order,
-        instance: Order,
-        created: bool,
-        using_db: "Optional[BaseDBAsyncClient]",
-        update_fields: List[str],
+    sender: Order,
+    instance: Order,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
 ) -> None:
     from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
 

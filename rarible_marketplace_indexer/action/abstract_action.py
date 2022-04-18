@@ -25,7 +25,6 @@ class ActionInterface(ABC):
         raise NotImplementedError
 
 
-
 class AbstractListAction(ActionInterface):
     @staticmethod
     @abstractmethod
@@ -46,25 +45,7 @@ class AbstractListAction(ActionInterface):
         if not dto.started_at:
             dto.started_at = transaction.data.timestamp
 
-        await Activity.create(
-            type=ActivityTypeEnum.LIST,
-            network=datasource.network,
-            platform=cls.platform,
-            internal_order_id=dto.internal_order_id,
-            maker=dto.maker,
-            make_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
-            make_contract=dto.contract,
-            make_token_id=dto.token_id,
-            make_value=dto.amount,
-            sell_price=dto.object_price,
-            operation_level=transaction.data.level,
-            operation_timestamp=transaction.data.timestamp,
-            operation_hash=transaction.data.hash,
-            operation_counter=transaction.data.counter,
-            operation_nonce=transaction.data.nonce,
-        )
-
-        await Order.create(
+        order = await Order.create(
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,
@@ -81,6 +62,33 @@ class AbstractListAction(ActionInterface):
             make_contract=dto.contract,
             make_token_id=dto.token_id,
             make_value=dto.amount,
+            take_asset_class=AssetClassEnum.XTZ,
+            take_contract=None,
+            take_token_id=None,
+            take_value=dto.object_price,
+        )
+
+        await Activity.create(
+            type=ActivityTypeEnum.LIST,
+            network=datasource.network,
+            platform=cls.platform,
+            order_id=order.id,
+            internal_order_id=dto.internal_order_id,
+            maker=dto.maker,
+            make_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
+            make_contract=dto.contract,
+            make_token_id=dto.token_id,
+            make_value=dto.amount,
+            take_asset_class=AssetClassEnum.XTZ,
+            take_contract=None,
+            take_token_id=None,
+            take_value=dto.object_price,
+            sell_price=dto.object_price,
+            operation_level=transaction.data.level,
+            operation_timestamp=transaction.data.timestamp,
+            operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
         )
 
 

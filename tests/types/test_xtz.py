@@ -49,11 +49,11 @@ class TestXtz:
     @pytest.mark.parametrize(
         'utz_value, expected',
         (
-                (127001, '0.127001'),
-                (127001.000000_1, '0.127001'),
-                (30_000_000, '30'),
-                (500_000_000, '500'),
-                ('-500_000_000', '-500'),
+            (127001, '0.127001'),
+            (127001.000000_1, '0.127001'),
+            (30_000_000, '30'),
+            (500_000_000, '500'),
+            ('-500_000_000', '-500'),
         ),
     )
     def test_from_u_tezos_positive(self, utz_value, expected):
@@ -63,9 +63,9 @@ class TestXtz:
     @pytest.mark.parametrize(
         'invalid_utz_value',
         (
-                127001.000001_0,
-                math.pi,
-                math.sqrt(3),
+            127001.000001_0,
+            math.pi,
+            math.sqrt(3),
         ),
     )
     def test_from_u_tezos_negative(self, invalid_utz_value):

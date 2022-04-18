@@ -41,12 +41,13 @@ class OperationHash(TezosObjectHash):
 
 
 class AccountAddress(TezosObjectHash):
+
+    length: int = 36
+
     def __new__(cls, address: str, **kwargs) -> 'TezosObjectHash':
         if cls is AccountAddress:
             raise NotImplementedError
         return super().__new__(cls, address, **kwargs)
-
-    length: int = 36
 
 
 class ImplicitAccountAddress(AccountAddress):

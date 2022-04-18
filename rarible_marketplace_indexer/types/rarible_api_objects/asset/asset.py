@@ -1,4 +1,3 @@
-from typing import Any
 from typing import Literal
 from typing import Optional
 from typing import Union
@@ -21,7 +20,6 @@ from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value impor
 
 class AbstractAsset(BaseModel):
     class Config:
-        fields = {'asset_class': {'exclude': True, 'alias': None, 'alias_priority': 3}}
         json_encoders = {
             BaseValue: lambda v: str(v),
         }
@@ -30,23 +28,19 @@ class AbstractAsset(BaseModel):
 
 
 class TokenAsset(AbstractAsset):
-    asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN] = None
+    _asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN] = None
     asset_type: TokenAssetType
     asset_value: AssetValue
 
 
 class XtzAsset(AbstractAsset):
-    asset_class: Literal[AssetClassEnum.XTZ] = None
+    _asset_class: Literal[AssetClassEnum.XTZ] = None
     asset_type: XtzAssetType
     asset_value: Xtz
 
 
 class Asset(AbstractAsset):
-    __root__: Annotated[Union[TokenAsset, XtzAsset], Field(discriminator='asset_class')]
-
-    def __init__(self, **data: Any) -> None:
-        data['__root__']['asset_class'] = data['__root__']['asset_type']['asset_class']
-        super().__init__(**data)
+    __root__: Annotated[Union[TokenAsset, XtzAsset], Field(discriminator_key='_asset_class')]
 
     @classmethod
     def make_from_model(cls, model: Union[Order, Activity]) -> AbstractAsset:

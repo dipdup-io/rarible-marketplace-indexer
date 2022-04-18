@@ -8,21 +8,22 @@ from rarible_marketplace_indexer.types.rarible_api_objects.activity.factory impo
 
 
 class TestRaribleApiActivity:
-    def test_serializer(self, activity_model):
-        activity_api_object = ActivityFactory.build(activity_model)
+    def test_kafka_topic(self, activity_data_provider):
+        activity_api_object = ActivityFactory.build(activity_data_provider.test_model)
+        assert activity_api_object.kafka_topic == 'activity_topic_mainnet'
 
-        assert activity_model.operation_hash
-        assert activity_model.operation_counter
+    def test_factory(self, activity_data_provider):
+        activity_api_object = ActivityFactory.build(activity_data_provider.test_model)
+        expected_object = activity_data_provider.test_object
+        assert activity_api_object == expected_object
 
-        assert str(activity_api_object.id) == 'ddce61de-326e-54d2-a91a-2d6fd2aa1d80'
+    def test_serializer(self, activity_data_provider):
+        activity_message = kafka_value_serializer(activity_data_provider.test_object, indent=2, sort_keys=True)
+        expected_message = activity_data_provider.test_message
+        assert activity_message == expected_message
 
-        activity_message = kafka_value_serializer(activity_api_object)
-        assert (
-                b'"make": {"assetType": {"assetClass": "TEZOS_FT", "contract": "KT1Q8JB2bdphCHhEBKc1PMsjArLPcAezGBVK", "tokenId": "2"}, "assetValue": 10}'
-                in activity_message
-        )
-
-    def test_clone(self, activity_model):
+    def test_clone(self, activity_data_provider):
+        activity_model = activity_data_provider.test_model
         old_id = activity_model.id
 
         @dataclass
@@ -52,7 +53,3 @@ class TestRaribleApiActivity:
 
         assert old_id != new_id
         assert isinstance(new_id, UUID)
-
-    def test_kafka_topic(self, activity_model):
-        activity_api_object = ActivityFactory.build(activity_model)
-        assert activity_api_object.kafka_topic == 'activity_topic_mainnet'

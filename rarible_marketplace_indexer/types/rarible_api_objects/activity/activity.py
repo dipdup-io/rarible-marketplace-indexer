@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Literal
 from typing import Optional
@@ -16,6 +17,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Op
 class AbstractRaribleApiActivity(AbstractRaribleApiObject):
     _kafka_topic = KafkaTopic.ACTIVITY_TOPIC
     type: str
+    order_id: uuid.UUID
     source: PlatformEnum
     hash: OperationHash
     date: datetime

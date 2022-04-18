@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from pytz import UTC
+
 from rarible_marketplace_indexer.models import Order
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.models import PlatformEnum
@@ -16,22 +18,22 @@ order_model = Order(
     platform=PlatformEnum.HEN,
     internal_order_id='1354',
     status=OrderStatusEnum.ACTIVE,
-    started_at=datetime(2021, 8, 9, 13, 7, 30),
+    started_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
     ended_at=None,
     make_stock=291,
     cancelled=False,
     salt=1207026,
-    created_at=datetime(2021, 8, 9, 13, 7, 30),
-    last_updated_at=datetime(2021, 8, 7, 15, 45, 46),
+    created_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
+    last_updated_at=datetime(2021, 8, 7, 15, 45, 46, tzinfo=UTC),
     make_price=Xtz(1),
     maker=ImplicitAccountAddress('tz2NY3Fgt5QufrYGP1JKdvLKcWWt86sLsqrS'),
     taker=None,
     make_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
     make_contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
-    make_token_id='49575',  # try int
+    make_token_id='49575',
     make_value=AssetValue(300),
-    take_asset_class=AssetClassEnum.XTZ,  # try str
+    take_asset_class=AssetClassEnum.XTZ,
     take_contract=None,
-    take_token_id=None,  # try enforce explicit representation
-    take_value=Xtz(1),  # try asset, int
+    take_token_id=None,
+    take_value=Xtz(1),
 )

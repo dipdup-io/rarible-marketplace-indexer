@@ -17,6 +17,7 @@ class ActivityFactory:
     def _build_list_activity(cls, activity: Activity) -> RaribleApiListActivity:
         return RaribleApiListActivity(
             id=activity.id,
+            order_id=activity.order_id,
             network=activity.network,
             hash=activity.operation_hash,
             maker=ImplicitAccountAddress(activity.maker),
@@ -31,6 +32,7 @@ class ActivityFactory:
     def _build_match_activity(cls, activity: Activity) -> RaribleApiMatchActivity:
         return RaribleApiMatchActivity(
             id=activity.id,
+            order_id=activity.order_id,
             network=activity.network,
             nft=Asset.make_from_model(activity),
             payment=Asset.take_from_model(activity),
@@ -46,6 +48,7 @@ class ActivityFactory:
     def _build_cancel_activity(cls, activity: Activity) -> RaribleApiCancelActivity:
         return RaribleApiCancelActivity(
             id=activity.id,
+            order_id=activity.order_id,
             network=activity.network,
             maker=ImplicitAccountAddress(activity.maker),
             make=Asset.make_from_model(activity),
