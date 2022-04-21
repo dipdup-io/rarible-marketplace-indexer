@@ -5,18 +5,18 @@ from typing import final
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.action.dto import CancelDto
-from rarible_marketplace_indexer.action.dto import ListDto
-from rarible_marketplace_indexer.action.dto import MatchDto
-from rarible_marketplace_indexer.models import Activity
+from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import ListDto
+from rarible_marketplace_indexer.event.dto import MatchDto
+from rarible_marketplace_indexer.models import ActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
-from rarible_marketplace_indexer.models import Order
+from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 
 
-class ActionInterface(ABC):
+class OrderEventInterface(ABC):
     platform: str = NotImplemented
 
     @classmethod
@@ -25,7 +25,7 @@ class ActionInterface(ABC):
         raise NotImplementedError
 
 
-class AbstractListAction(ActionInterface):
+class AbstractOrderListEvent(OrderEventInterface):
     @staticmethod
     @abstractmethod
     def _get_list_dto(
@@ -45,7 +45,7 @@ class AbstractListAction(ActionInterface):
         if not dto.started_at:
             dto.started_at = transaction.data.timestamp
 
-        order = await Order.create(
+        order = await OrderModel.create(
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,
@@ -68,8 +68,8 @@ class AbstractListAction(ActionInterface):
             take_value=dto.object_price,
         )
 
-        await Activity.create(
-            type=ActivityTypeEnum.LIST,
+        await ActivityModel.create(
+            type=ActivityTypeEnum.ORDER_LIST,
             network=datasource.network,
             platform=cls.platform,
             order_id=order.id,
@@ -92,7 +92,7 @@ class AbstractListAction(ActionInterface):
         )
 
 
-class AbstractCancelAction(ActionInterface):
+class AbstractOrderCancelEvent(OrderEventInterface):
     @staticmethod
     @abstractmethod
     def _get_cancel_dto(
@@ -110,7 +110,7 @@ class AbstractCancelAction(ActionInterface):
     ):
         dto = cls._get_cancel_dto(transaction, datasource)
         last_order_activity = (
-            await Activity.filter(
+            await ActivityModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
@@ -120,11 +120,11 @@ class AbstractCancelAction(ActionInterface):
         )
         cancel_activity = last_order_activity.apply(transaction)
 
-        cancel_activity.type = ActivityTypeEnum.CANCEL
+        cancel_activity.type = ActivityTypeEnum.ORDER_CANCEL
         await cancel_activity.save()
 
         order = (
-            await Order.filter(
+            await OrderModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
@@ -142,7 +142,7 @@ class AbstractCancelAction(ActionInterface):
         await order.save()
 
 
-class AbstractMatchAction(ActionInterface):
+class AbstractOrderMatchEvent(OrderEventInterface):
     @staticmethod
     @abstractmethod
     def _get_match_dto(
@@ -153,7 +153,7 @@ class AbstractMatchAction(ActionInterface):
 
     @staticmethod
     @final
-    def _process_order_match(order: Order, dto: MatchDto) -> Order:
+    def _process_order_match(order: OrderModel, dto: MatchDto) -> OrderModel:
         order.take_asset_class = AssetClassEnum.XTZ
         order.take_value = Xtz(order.make_price) * dto.match_amount
         order.make_stock -= dto.match_amount
@@ -174,7 +174,7 @@ class AbstractMatchAction(ActionInterface):
         dto = cls._get_match_dto(transaction, datasource)
 
         last_list_activity = (
-            await Activity.filter(
+            await ActivityModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
@@ -184,7 +184,7 @@ class AbstractMatchAction(ActionInterface):
         )
         match_activity = last_list_activity.apply(transaction)
 
-        match_activity.type = ActivityTypeEnum.MATCH
+        match_activity.type = ActivityTypeEnum.ORDER_MATCH
         match_activity.taker = transaction.data.sender_address
 
         match_activity.amount = dto.match_amount
@@ -194,7 +194,7 @@ class AbstractMatchAction(ActionInterface):
 
         await match_activity.save()
 
-        order = await Order.get(
+        order = await OrderModel.get(
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,

@@ -31,9 +31,12 @@ class OrderStatusEnum(str, Enum):
 
 
 class ActivityTypeEnum(str, Enum):
-    LIST: _StrEnumValue = 'LIST'
-    MATCH: _StrEnumValue = 'SELL'
-    CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    ORDER_LIST: _StrEnumValue = 'LIST'
+    ORDER_MATCH: _StrEnumValue = 'SELL'
+    ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    TOKEN_MINT: _StrEnumValue = 'MINT'
+    TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
+    TOKEN_BURN: _StrEnumValue = 'BURN'
 
 
 class PlatformEnum(str, Enum):
@@ -43,7 +46,7 @@ class PlatformEnum(str, Enum):
     RARIBLE: _StrEnumValue = 'Rarible'
 
 
-class Activity(Model):
+class ActivityModel(Model):
     class Meta:
         table = 'marketplace_activity'
 
@@ -101,7 +104,7 @@ class Activity(Model):
         return activity
 
 
-class Order(Model):
+class OrderModel(Model):
     class Meta:
         table = 'marketplace_order'
 
@@ -149,27 +152,27 @@ class Order(Model):
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 
-@post_save(Order)
+@post_save(OrderModel)
 async def signal_order_post_save(
-    sender: Order,
-    instance: Order,
+    sender: OrderModel,
+    instance: OrderModel,
     created: bool,
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
+    from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import RaribleApiOrderFactory
 
-    await producer_send(OrderFactory.build(instance))
+    await producer_send(RaribleApiOrderFactory.build(instance))
 
 
-@post_save(Activity)
+@post_save(ActivityModel)
 async def signal_activity_post_save(
-    sender: Activity,
-    instance: Activity,
+    sender: ActivityModel,
+    instance: ActivityModel,
     created: bool,
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.activity.factory import ActivityFactory
+    from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.factory import RaribleApiOrderActivityFactory
 
-    await producer_send(ActivityFactory.build(instance))
+    await producer_send(RaribleApiOrderActivityFactory.build(instance))

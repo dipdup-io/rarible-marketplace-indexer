@@ -2,7 +2,7 @@ import pytest
 from _pytest.fixtures import SubRequest
 from pydantic import parse_obj_as
 
-from rarible_marketplace_indexer.models import Order
+from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import Asset
 
 
@@ -31,7 +31,7 @@ class TestAsset:
         assert asset
 
     def test_from_order(self, asset_data):
-        order = Order(
+        order = OrderModel(
             make_asset_class=asset_data['asset_type']['asset_class'],
             make_contract=asset_data['asset_type'].get('contract'),
             make_token_id=asset_data['asset_type'].get('token_id'),

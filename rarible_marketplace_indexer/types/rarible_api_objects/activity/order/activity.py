@@ -14,7 +14,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHash
 
 
-class AbstractRaribleApiActivity(AbstractRaribleApiObject):
+class AbstractRaribleApiOrderActivity(AbstractRaribleApiObject):
     _kafka_topic = KafkaTopic.ACTIVITY_TOPIC
     type: str
     order_id: uuid.UUID
@@ -24,16 +24,16 @@ class AbstractRaribleApiActivity(AbstractRaribleApiObject):
     reverted: bool = False
 
 
-class RaribleApiListActivity(AbstractRaribleApiActivity):
-    type: Literal[ActivityTypeEnum.LIST] = ActivityTypeEnum.LIST
+class RaribleApiOrderListActivity(AbstractRaribleApiOrderActivity):
+    type: Literal[ActivityTypeEnum.ORDER_LIST] = ActivityTypeEnum.ORDER_LIST
     maker: ImplicitAccountAddress
     make: AbstractAsset
     take: Optional[AbstractAsset]
     price: Xtz
 
 
-class RaribleApiMatchActivity(AbstractRaribleApiActivity):
-    type: Literal[ActivityTypeEnum.MATCH] = ActivityTypeEnum.MATCH
+class RaribleApiOrderMatchActivity(AbstractRaribleApiOrderActivity):
+    type: Literal[ActivityTypeEnum.ORDER_MATCH] = ActivityTypeEnum.ORDER_MATCH
     nft: AbstractAsset
     payment: Optional[AbstractAsset]
     buyer: ImplicitAccountAddress
@@ -41,11 +41,11 @@ class RaribleApiMatchActivity(AbstractRaribleApiActivity):
     price: Xtz
 
 
-class RaribleApiCancelActivity(AbstractRaribleApiActivity):
-    type: Literal[ActivityTypeEnum.CANCEL] = ActivityTypeEnum.CANCEL
+class RaribleApiOrderCancelActivity(AbstractRaribleApiOrderActivity):
+    type: Literal[ActivityTypeEnum.ORDER_CANCEL] = ActivityTypeEnum.ORDER_CANCEL
     maker: ImplicitAccountAddress
     make: AbstractAsset
     take: Optional[AbstractAsset]
 
 
-RaribleApiActivity = Union[RaribleApiListActivity, RaribleApiMatchActivity, RaribleApiCancelActivity]
+RaribleApiOrderActivity = Union[RaribleApiOrderListActivity, RaribleApiOrderMatchActivity, RaribleApiOrderCancelActivity]

@@ -4,16 +4,16 @@ from typing import Optional
 from uuid import UUID
 
 from rarible_marketplace_indexer.producer.serializer import kafka_value_serializer
-from rarible_marketplace_indexer.types.rarible_api_objects.activity.factory import ActivityFactory
+from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.factory import RaribleApiOrderActivityFactory
 
 
 class TestRaribleApiActivity:
     def test_kafka_topic(self, activity_data_provider):
-        activity_api_object = ActivityFactory.build(activity_data_provider.test_model)
+        activity_api_object = RaribleApiOrderActivityFactory.build(activity_data_provider.test_model)
         assert activity_api_object.kafka_topic == 'activity_topic_mainnet'
 
     def test_factory(self, activity_data_provider):
-        activity_api_object = ActivityFactory.build(activity_data_provider.test_model)
+        activity_api_object = RaribleApiOrderActivityFactory.build(activity_data_provider.test_model)
         expected_object = activity_data_provider.test_object
         assert activity_api_object == expected_object
 

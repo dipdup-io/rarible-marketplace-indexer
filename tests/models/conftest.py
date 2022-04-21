@@ -15,9 +15,9 @@ import pytest
 from pydantic import BaseModel
 from tortoise.models import Model
 
-from rarible_marketplace_indexer.models import Activity
-from rarible_marketplace_indexer.models import Order
-from rarible_marketplace_indexer.types.rarible_api_objects.activity.activity import RaribleApiActivity
+from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import OrderModel
+from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 
 
@@ -29,13 +29,13 @@ class TestModelData(ABC):
 
 
 class TestOrderData(TestModelData):
-    test_model: Order
+    test_model: OrderModel
     test_object: RaribleApiOrder
 
 
 class TestActivityData(TestModelData):
-    test_model: Activity
-    test_object: RaribleApiActivity
+    test_model: ActivityModel
+    test_object: RaribleApiOrderActivity
 
 
 # @pytest.fixture(scope='function')

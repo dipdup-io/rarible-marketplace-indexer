@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pytz import UTC
 
-from rarible_marketplace_indexer.models import Activity
+from rarible_marketplace_indexer.models import ActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
@@ -12,8 +12,8 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHash
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
-activity_model = Activity(
-    type=ActivityTypeEnum.MATCH,
+activity_model = ActivityModel(
+    type=ActivityTypeEnum.ORDER_MATCH,
     network='mainnet',
     platform=PlatformEnum.OBJKT,
     order_id=UUID('1603ff55-2507-5cba-b50c-3ae50162c5ee'),

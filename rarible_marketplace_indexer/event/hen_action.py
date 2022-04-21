@@ -1,12 +1,12 @@
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.action.abstract_action import AbstractCancelAction
-from rarible_marketplace_indexer.action.abstract_action import AbstractListAction
-from rarible_marketplace_indexer.action.abstract_action import AbstractMatchAction
-from rarible_marketplace_indexer.action.dto import CancelDto
-from rarible_marketplace_indexer.action.dto import ListDto
-from rarible_marketplace_indexer.action.dto import MatchDto
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCancelEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderListEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatchEvent
+from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import ListDto
+from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.hen_marketplace.parameter.cancel_swap import CancelSwapParameter
 from rarible_marketplace_indexer.types.hen_marketplace.parameter.collect import CollectParameter
@@ -18,7 +18,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 
-class HENListAction(AbstractListAction):
+class HENOrderListEvent(AbstractOrderListEvent):
     platform = PlatformEnum.HEN
     HENListTransaction = Transaction[SwapParameter, HenMarketplaceStorage]
 
@@ -37,7 +37,7 @@ class HENListAction(AbstractListAction):
         )
 
 
-class HENCancelAction(AbstractCancelAction):
+class HENOrderCancelEvent(AbstractOrderCancelEvent):
     platform = PlatformEnum.HEN
     HENCancelTransaction = Transaction[CancelSwapParameter, HenMarketplaceStorage]
 
@@ -48,7 +48,7 @@ class HENCancelAction(AbstractCancelAction):
         )
 
 
-class HENMatchAction(AbstractMatchAction):
+class HENOrderMatchEvent(AbstractOrderMatchEvent):
     platform = PlatformEnum.HEN
     HENMatchTransaction = Transaction[CollectParameter, HenMarketplaceStorage]
 

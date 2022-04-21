@@ -1,12 +1,12 @@
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.action.abstract_action import AbstractCancelAction
-from rarible_marketplace_indexer.action.abstract_action import AbstractListAction
-from rarible_marketplace_indexer.action.abstract_action import AbstractMatchAction
-from rarible_marketplace_indexer.action.dto import CancelDto
-from rarible_marketplace_indexer.action.dto import ListDto
-from rarible_marketplace_indexer.action.dto import MatchDto
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCancelEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderListEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatchEvent
+from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import ListDto
+from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.objkt_marketplace_v2.parameter.ask import AskParameter
 from rarible_marketplace_indexer.types.objkt_marketplace_v2.parameter.fulfill_ask import FulfillAskParameter
@@ -18,7 +18,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 
-class ObjktV2ListAction(AbstractListAction):
+class ObjktV2OrderListEvent(AbstractOrderListEvent):
     platform = PlatformEnum.OBJKT_V2
     ObjktListTransaction = Transaction[AskParameter, ObjktMarketplaceV2Storage]
 
@@ -37,7 +37,7 @@ class ObjktV2ListAction(AbstractListAction):
         )
 
 
-class ObjktV2CancelAction(AbstractCancelAction):
+class ObjktV2OrderCancelEvent(AbstractOrderCancelEvent):
     platform = PlatformEnum.OBJKT_V2
     ObjktCancelTransaction = Transaction[RetractAskParameter, ObjktMarketplaceV2Storage]
 
@@ -46,7 +46,7 @@ class ObjktV2CancelAction(AbstractCancelAction):
         return CancelDto(internal_order_id=transaction.parameter.__root__)
 
 
-class ObjktV2MatchAction(AbstractMatchAction):
+class ObjktV2OrderMatchEvent(AbstractOrderMatchEvent):
     platform = PlatformEnum.OBJKT_V2
     ObjktMatchTransaction = Transaction[FulfillAskParameter, ObjktMarketplaceV2Storage]
 

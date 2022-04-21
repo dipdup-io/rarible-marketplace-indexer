@@ -5,7 +5,7 @@ from pytz import UTC
 
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import PlatformEnum
-from rarible_marketplace_indexer.types.rarible_api_objects.activity.activity import RaribleApiMatchActivity
+from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderMatchActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import TokenAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import XtzAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import FungibleTokenAssetType
@@ -16,10 +16,10 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHash
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
-activity_object = RaribleApiMatchActivity(
+activity_object = RaribleApiOrderMatchActivity(
     id=UUID('45b51339-c32e-56ab-a44f-66463b7d4fad'),
     network='mainnet',
-    type=ActivityTypeEnum.MATCH,
+    type=ActivityTypeEnum.ORDER_MATCH,
     source=PlatformEnum.OBJKT,
     order_id=UUID('1603ff55-2507-5cba-b50c-3ae50162c5ee'),
     hash=OperationHash('oo4GwwjGX6RimeYBp68ddo1PS4aBc7ZpWDFmrqwZRcocnGykChm'),
