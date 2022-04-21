@@ -1,7 +1,7 @@
 datasources:
   tzkt_hangzhou2net:
     kind: tzkt
-    url: https://api.hangzhou2net.tzkt.io
+    url: ${TZKT_URL:-https://api.hangzhou2net.tzkt.io}
 
 contracts:
   rarible_exchange_hangzhou2net:
