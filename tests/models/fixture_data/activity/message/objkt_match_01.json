@@ -13,15 +13,15 @@
          "contract": "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
          "tokenId": "157097"
       },
-      "assetValue": 9
+      "assetValue": "9"
    },
    "payment": {
       "assetType": {
          "assetClass": "XTZ"
       },
-      "assetValue": 3
+      "assetValue": "3"
    },
    "buyer": "tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv",
    "seller": "tz1bn9ud4BmNGSCTWT86gB23ynR7tuWk8gAk",
-   "price": 3
+   "price": "3"
 }

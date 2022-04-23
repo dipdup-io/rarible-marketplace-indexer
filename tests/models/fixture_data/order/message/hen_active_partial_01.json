@@ -2,16 +2,16 @@
     "id": "1fa0e1f7-24c1-5cfe-bec8-af34cc7d69c2",
     "network": "mainnet",
     "platform": "Hen",
-    "fill": 9,
+    "fill": "9",
     "status": "ACTIVE",
     "startedAt": "2021-08-09T13:07:30+00:00",
     "endedAt": null,
-    "makeStock": 291,
+    "makeStock": "291",
     "cancelled": false,
-    "salt": 1207026,
+    "salt": "1207026",
     "createdAt": "2021-08-09T13:07:30+00:00",
     "lastUpdatedAt": "2021-08-07T15:45:46+00:00",
-    "makePrice": 1,
+    "makePrice": "1",
     "maker": "tz2NY3Fgt5QufrYGP1JKdvLKcWWt86sLsqrS",
     "taker": null,
     "make": {
@@ -20,12 +20,12 @@
             "contract": "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
             "tokenId": "49575"
         },
-        "assetValue": 300
+        "assetValue": "300"
     },
     "take": {
         "assetType": {
             "assetClass": "XTZ"
         },
-        "assetValue": 1
+        "assetValue": "1"
     }
 }

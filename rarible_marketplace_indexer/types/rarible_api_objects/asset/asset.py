@@ -20,9 +20,6 @@ from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value impor
 
 class AbstractAsset(BaseModel):
     class Config:
-        json_encoders = {
-            BaseValue: lambda v: str(v),
-        }
         alias_generator = camelize
         allow_population_by_field_name = True
 
