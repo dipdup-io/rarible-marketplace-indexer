@@ -8,7 +8,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "~3.10"
 dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "feat/token-index"}
-pytezos = {git = "https://github.com/baking-bad/pytezos.git", branch = "master"}
 
 aiokafka = "^0.7.2"
 

@@ -3,7 +3,7 @@
 
 source_dir := rarible_marketplace_indexer
 unit_tests_dir := tests
-dipdup_dev := -c dipdup.dev.yml -c dipdup.mainnet.yml -c dipdup.hangzhounet.yml
+dipdup_args := -c dipdup.dev.yml -c dipdup.mainnet.yml -c dipdup.hangzhounet.yml
 
 install:
 	poetry install `if [ "${DEV}" = "0" ]; then echo "--no-dev"; fi`
@@ -26,8 +26,8 @@ mypy:
 lint: isort ssort black flake
 
 run_dev:
-	poetry run dipdup $(dipdup_dev) schema wipe --immune --force
-	poetry run dipdup $(dipdup_dev) run
+	poetry run dipdup $(dipdup_args) schema wipe --immune --force
+	poetry run dipdup $(dipdup_args) run
 
 prepare_services:
 	docker-compose up -d --remove-orphans db hasura kafdrop kafka0 zookeeper0
