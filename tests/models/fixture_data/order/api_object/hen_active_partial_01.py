@@ -1,7 +1,5 @@
 from datetime import datetime
-from datetime import tzinfo
 from uuid import UUID
-from uuid import uuid4
 
 from pytz import UTC
 

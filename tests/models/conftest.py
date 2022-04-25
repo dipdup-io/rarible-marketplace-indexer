@@ -1,5 +1,4 @@
 import json
-from abc import ABC
 from dataclasses import dataclass
 from importlib import import_module
 from os import DirEntry
@@ -12,6 +11,7 @@ from typing import Sequence
 from typing import Type
 
 import pytest
+from _pytest.fixtures import SubRequest
 from pydantic import BaseModel
 from tortoise.models import Model
 
@@ -21,61 +21,86 @@ from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activi
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 
 
+class TestingSubject:
+    order: str = 'order'
+    activity: str = 'activity'
+
+
 @dataclass
-class TestModelData(ABC):
-    test_model: Model = ...
-    test_object: BaseModel = ...
-    test_message: Optional[bytes] = None
+class TestModelData:
+    test_model: Optional[Model]
+    test_api_object: BaseModel
+    test_message: Optional[bytes]
 
 
 class TestOrderData(TestModelData):
-    test_model: OrderModel
-    test_object: RaribleApiOrder
+    test_model: Optional[OrderModel]
+    test_api_object: RaribleApiOrder
 
 
 class TestActivityData(TestModelData):
-    test_model: ActivityModel
-    test_object: RaribleApiOrderActivity
+    test_model: Optional[ActivityModel]
+    test_api_object: RaribleApiOrderActivity
 
 
-# @pytest.fixture(scope='function')
-def data_loader(object_name):
+def import_object(object_name: str, object_type: str, testcase_name: str):
+    try:
+        test_module = import_module(f'tests.models.fixture_data.{object_name}.{object_type}.{testcase_name}')
+        result = getattr(test_module, f'{object_name}_{object_type}')
+        del test_module
+    except ImportError:
+        result = None
+
+    return result
+
+
+def data_loader(object_type: str):
     fixtures: Dict[str, Type[TestModelData]] = {
-        'order': TestOrderData,
-        'activity': TestActivityData,
+        TestingSubject.order: TestOrderData,
+        TestingSubject.activity: TestActivityData,
     }
 
-    object_dataclass = fixtures[object_name]
+    object_dataclass = fixtures[object_type]
 
-    object_module = f'tests.models.fixture_data.{object_name}'
-    object_path_parts = [dirname(__file__), f'fixture_data/{object_name}']
+    object_path_parts = [dirname(__file__), f'fixture_data/{object_type}']
     model_dir = join(*object_path_parts, 'model')  # noqa
     message_dir = join(*object_path_parts, 'message')  # noqa
-    with scandir(model_dir) as entries:
+    with scandir(message_dir) as entries:
         entries: Sequence[DirEntry]
         for entry in entries:
             if entry.name[:2] == '__':
                 continue
-            datafile_basename = entry.name[:-3]
-            module = import_module(f'{object_module}.model.{datafile_basename}')
-            test_model: Model = getattr(module, f'{object_name}_model')  # noqa
-            del module
-            module = import_module(f'{object_module}.object.{datafile_basename}')
-            test_object = getattr(module, f'{object_name}_object')  # noqa
-            del module
+            datafile_basename = entry.name[:-5]
+
+            test_model: Optional[Model] = import_object(object_type, 'model', datafile_basename)
+            test_api_object = import_object(object_type, 'api_object', datafile_basename)
+
             with open(join(message_dir, f'{datafile_basename}.json'), mode='r') as fp:
-                test_message = json.dumps(json.load(fp), sort_keys=True, indent=2).encode()
+                test_message = json.dumps(json.load(fp), sort_keys=True).encode()
 
-                yield object_dataclass(test_model=test_model, test_object=test_object, test_message=test_message)
-
-
-@pytest.fixture
-def order_data_provider():
-    for test_data in data_loader('order'):
-        yield test_data
+            yield object_dataclass(test_model=test_model, test_api_object=test_api_object, test_message=test_message)  # noqa
 
 
-@pytest.fixture
-def activity_data_provider():
-    for test_data in data_loader('activity'):
-        yield test_data
+@pytest.fixture(params=data_loader(TestingSubject.order))
+def order_data_provider(request: SubRequest):
+    return request.param
+
+
+@pytest.fixture(params=filter(lambda x: x.test_model is not None, data_loader(TestingSubject.activity)))
+def activity_model_data_provider(request: SubRequest):
+    return request.param
+
+
+@pytest.fixture(params=data_loader(TestingSubject.activity))
+def activity_serializer_data_provider(request: SubRequest):
+    return request.param
+
+
+def compare_kafka_messages(actual: bytes, expected: bytes):
+    assert type(actual) == type(expected) == bytes
+
+    actual_dict: dict = json.loads(actual)
+    expected_dict: dict = json.loads(expected)
+    assert actual_dict.keys() == expected_dict.keys()
+
+    assert actual_dict == expected_dict

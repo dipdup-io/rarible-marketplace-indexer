@@ -80,6 +80,12 @@ indexes:
           - destination: objkt_v2_mainnet
             entrypoint: fulfill_ask
 
+  token_ransfers:
+    kind: token_transfer
+    datasource: tzkt_mainnet
+    handlers:
+      - callback: on_transfer
+
 advanced:
   reindex:
     manual: wipe

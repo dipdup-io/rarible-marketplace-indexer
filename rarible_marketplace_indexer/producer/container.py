@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from logging import Logger
 from typing import Any
 from typing import Dict
 from typing import Optional
+from typing import Union
 
 from aiokafka import AIOKafkaProducer
 
@@ -9,13 +12,15 @@ from rarible_marketplace_indexer.producer.null_kafka_producer import NullKafkaPr
 from rarible_marketplace_indexer.producer.serializer import kafka_key_serializer
 from rarible_marketplace_indexer.producer.serializer import kafka_value_serializer
 
+AIOKafkaProducerInterface = Union[AIOKafkaProducer, NullKafkaProducer]
+
 
 class ProducerContainer:
-    __instance: Optional[AIOKafkaProducer] = None
+    __instance: Optional[AIOKafkaProducerInterface] = None
 
     @classmethod
-    def get_instance(cls) -> AIOKafkaProducer:
-        if not isinstance(cls.__instance, AIOKafkaProducer):
+    def get_instance(cls) -> AIOKafkaProducerInterface:
+        if not isinstance(cls.__instance, AIOKafkaProducerInterface):
             raise RuntimeError
         return cls.__instance
 

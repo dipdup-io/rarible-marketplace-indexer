@@ -1,8 +1,9 @@
 {
   "id": "45b51339-c32e-56ab-a44f-66463b7d4fad",
   "network": "mainnet",
-  "type": "MINT",
+  "type": "TRANSFER",
   "transferId": "41354710",
+  "from": "tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv",
   "owner": "tz1LaVcjZPWzVS8pa1nptgwKoSXRZ2dRQs6f",
   "contract": "KT1DVkpd3UKJMe496e3fcB2ZZDjr1wvWPEcc",
   "tokenId": "47",

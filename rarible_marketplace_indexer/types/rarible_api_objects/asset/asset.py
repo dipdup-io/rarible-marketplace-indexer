@@ -14,7 +14,6 @@ from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type impo
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import XtzAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
-from rarible_marketplace_indexer.types.tezos_objects.asset_value.base_value import BaseValue
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 
 

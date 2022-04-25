@@ -29,3 +29,9 @@ indexes:
         pattern:
           - destination: rarible_exchange_hangzhou2net
             entrypoint: buy
+
+  token_ransfers:
+    kind: token_transfer
+    datasource: tzkt_hangzhou2net
+    handlers:
+      - callback: on_transfer

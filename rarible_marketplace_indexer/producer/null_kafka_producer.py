@@ -1,18 +1,22 @@
+from __future__ import annotations
+
 from logging import Logger
 from typing import Optional
+from typing import Union
 
-from aiokafka import AIOKafkaProducer
 from pydantic import BaseModel
 
+from rarible_marketplace_indexer.producer.serializer import kafka_key_serializer
+from rarible_marketplace_indexer.producer.serializer import kafka_value_serializer
 
-# noinspection PyMissingConstructor
-class NullKafkaProducer(AIOKafkaProducer):
-    def __init__(self, logger: Logger, *args, **kwargs):
+
+class NullKafkaProducer:
+    def __init__(self, logger: Logger):
         self._logger: Logger = logger
 
     async def start(self):
         pass
 
-    async def send(self, topic: str, value: BaseModel = None, key: Optional[bytes] = None, *args, **kwargs):
-        message = {'topic': {'key': key, 'value': value.json(by_alias=True)}}
+    async def send(self, topic: str, value: BaseModel = None, key: Optional[Union[int, str]] = None, *args, **kwargs):
+        message = {'topic': topic, 'message': {'key': kafka_key_serializer(key), 'value': kafka_value_serializer(value)}}
         self._logger.info(message)
