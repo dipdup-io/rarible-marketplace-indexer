@@ -19,10 +19,12 @@ class RaribleApiTokenActivityFactory:
     @classmethod
     def _build_base_activity(cls, transfer_data: TokenTransferData, datasource: TzktDatasource) -> BaseRaribleApiTokenActivity:
         value = AssetValue(transfer_data.amount)
-        if transfer_data.metadata is not None:
+        try:
             decimals = int(transfer_data.metadata.get('decimals', 0))
             if decimals > 0:
                 value = value / 10**decimals
+        except (ValueError, AttributeError, KeyError):
+            pass
 
         transaction_id = list(
             filter(
