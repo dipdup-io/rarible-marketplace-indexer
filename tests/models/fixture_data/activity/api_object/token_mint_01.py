@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from pytz import UTC
 
@@ -10,7 +9,6 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 activity_api_object = RaribleApiTokenMintActivity(
-    id=UUID('45b51339-c32e-56ab-a44f-66463b7d4fad'),
     network='mainnet',
     type=ActivityTypeEnum.TOKEN_MINT,
     transfer_id=41354710,

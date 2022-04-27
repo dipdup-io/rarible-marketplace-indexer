@@ -36,7 +36,7 @@ class TezosObjectHash(str):
 
 class OperationHash(TezosObjectHash):
     length: int = 51
-    header: str = 'oo'
+    header: str = 'o'
 
 
 class AccountAddress(TezosObjectHash):

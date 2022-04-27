@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from pytz import UTC
 
@@ -10,15 +9,14 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 activity_api_object = RaribleApiTokenTransferActivity(
-    id=UUID('45b51339-c32e-56ab-a44f-66463b7d4fad'),
     network='mainnet',
     type=ActivityTypeEnum.TOKEN_TRANSFER,
-    transfer_id=41354710,
-    transfer_from=ImplicitAccountAddress('tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv'),
-    owner=ImplicitAccountAddress('tz1LaVcjZPWzVS8pa1nptgwKoSXRZ2dRQs6f'),
-    contract=OriginatedAccountAddress('KT1DVkpd3UKJMe496e3fcB2ZZDjr1wvWPEcc'),
-    token_id=47,
-    value=AssetValue(10),
-    transaction_id=41354703,
-    date=datetime(2021, 2, 19, 4, 8, 36, tzinfo=UTC),
+    transfer_id=62734941,
+    transfer_from=ImplicitAccountAddress('tz1Zw7KfW7y9TT1p5vNDHf2sehmQXefhyzwg'),
+    owner=ImplicitAccountAddress('KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn'),
+    contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
+    token_id=165879,
+    value=AssetValue(1),
+    transaction_id=62734842,
+    date=datetime(2021, 7, 12, 18, 1, 18, tzinfo=UTC),
 )

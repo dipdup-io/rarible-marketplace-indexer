@@ -276,7 +276,7 @@ http = ["httpx"]
 
 [[package]]
 name = "dipdup"
-version = "5.0.1"
+version = "5.0.2"
 description = "Python SDK for developing indexers of Tezos smart contracts inspired by The Graph"
 category = "main"
 optional = false
@@ -312,7 +312,7 @@ pytezos = ["pytezos (>=3.2.4,<4.0.0)"]
 type = "git"
 url = "https://github.com/dipdup-net/dipdup-py.git"
 reference = "feat/token-index"
-resolved_reference = "4b66a29b309f40cea56d142640de83fc58e09906"
+resolved_reference = "ac15db5db519726fe3ff098d1cfc370694af47c3"
 
 [[package]]
 name = "dnspython"
