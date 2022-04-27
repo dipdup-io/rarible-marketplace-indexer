@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic.dataclasses import dataclass
 
+from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
@@ -31,3 +32,11 @@ class MatchDto:
     internal_order_id: str
     match_amount: AssetValue
     match_timestamp: datetime
+
+
+@dataclass
+class TakeDto:
+    asset_class: AssetClassEnum
+    contract: Optional[OriginatedAccountAddress]
+    token_id: Optional[int]
+    value: AssetValue
