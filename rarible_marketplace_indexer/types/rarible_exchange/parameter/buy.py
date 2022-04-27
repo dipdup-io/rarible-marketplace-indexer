@@ -3,8 +3,26 @@
 
 from __future__ import annotations
 
+from typing import List
+
 from pydantic import BaseModel
 from pydantic import Extra
+
+
+class BOriginFee(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+    part_account: str
+    part_value: str
+
+
+class BPayout(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+    part_account: str
+    part_value: str
 
 
 class BuyParameter(BaseModel):
@@ -16,4 +34,5 @@ class BuyParameter(BaseModel):
     b_seller: str
     b_sale_type: str
     b_sale_asset: str
-    b_buyer: str
+    b_origin_fees: List[BOriginFee]
+    b_payouts: List[BPayout]

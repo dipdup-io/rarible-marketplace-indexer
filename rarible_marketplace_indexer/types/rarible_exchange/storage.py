@@ -19,4 +19,6 @@ class RaribleExchangeStorage(BaseModel):
     transfer_manager: str
     sales_storage: str
     owner_candidate: Optional[str]
+    max_bundle_items: str
+    max_fees_limit: str
     metadata: Dict[str, str]

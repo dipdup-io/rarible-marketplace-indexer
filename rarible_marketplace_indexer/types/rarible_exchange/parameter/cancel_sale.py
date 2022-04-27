@@ -13,6 +13,5 @@ class CancelSaleParameter(BaseModel):
 
     cs_asset_contract: str
     cs_asset_token_id: str
-    cs_seller: str
     cs_sale_type: str
     cs_sale_asset: str

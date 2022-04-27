@@ -1,0 +1,31 @@
+datasources:
+  tzkt_ithacanet:
+    kind: tzkt
+    url: ${TZKT_URL:-https://api.ithacanet.tzkt.io}
+
+contracts:
+  rarible_exchange_ithacanet:
+    address: KT1QaGwLxoBqeQaWpe7HUyEFnXQfGi9P2g6a
+    typename: rarible_exchange
+
+indexes:
+  rarible_exchange_actions:
+    kind: operation
+    datasource: tzkt_ithacanet
+    contracts:
+      - rarible_exchange_ithacanet
+    handlers:
+      - callback: rarible_order_list
+        pattern:
+          - destination: rarible_exchange_ithacanet
+            entrypoint: sell
+
+      - callback: rarible_order_cancel_list
+        pattern:
+          - destination: rarible_exchange_ithacanet
+            entrypoint: cancel_sale
+
+      - callback: rarible_order_match
+        pattern:
+          - destination: rarible_exchange_ithacanet
+            entrypoint: buy
