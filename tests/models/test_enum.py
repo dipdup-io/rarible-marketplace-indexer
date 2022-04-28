@@ -3,7 +3,6 @@ import pytest
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.models import PlatformEnum
-from rarible_marketplace_indexer.models import _StrEnumValue  # noqa
 
 
 class TestStrEnum:

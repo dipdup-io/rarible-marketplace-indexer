@@ -12,8 +12,7 @@ from rarible_marketplace_indexer.models import ActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
-from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
-from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
+from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 
 
 class OrderEventInterface(ABC):
@@ -52,20 +51,20 @@ class AbstractOrderListEvent(OrderEventInterface):
             status=OrderStatusEnum.ACTIVE,
             started_at=dto.started_at,
             ended_at=dto.ended_at,
-            make_stock=dto.amount,
+            make_stock=dto.make.value,
             salt=transaction.data.counter,
             created_at=transaction.data.timestamp,
             last_updated_at=transaction.data.timestamp,
-            make_price=dto.object_price,
+            make_price=dto.make_price,
             maker=dto.maker,
-            make_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
-            make_contract=dto.contract,
-            make_token_id=dto.token_id,
-            make_value=dto.amount,
-            take_asset_class=AssetClassEnum.XTZ,
-            take_contract=None,
-            take_token_id=None,
-            take_value=dto.object_price,
+            make_asset_class=dto.make.asset_class,
+            make_contract=dto.make.contract,
+            make_token_id=dto.make.token_id,
+            make_value=dto.make.value,
+            take_asset_class=dto.take.asset_class,
+            take_contract=dto.take.contract,
+            take_token_id=dto.take.token_id,
+            take_value=dto.take.value,
         )
 
         await ActivityModel.create(
@@ -75,15 +74,15 @@ class AbstractOrderListEvent(OrderEventInterface):
             order_id=order.id,
             internal_order_id=dto.internal_order_id,
             maker=dto.maker,
-            make_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
-            make_contract=dto.contract,
-            make_token_id=dto.token_id,
-            make_value=dto.amount,
-            take_asset_class=AssetClassEnum.XTZ,
-            take_contract=None,
-            take_token_id=None,
-            take_value=dto.object_price,
-            sell_price=dto.object_price,
+            make_asset_class=dto.make.asset_class,
+            make_contract=dto.make.contract,
+            make_token_id=dto.make.token_id,
+            make_value=dto.make.value,
+            take_asset_class=dto.take.asset_class,
+            take_contract=dto.take.contract,
+            take_token_id=dto.take.token_id,
+            take_value=dto.take.value,
+            sell_price=dto.make_price,
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,
@@ -154,10 +153,8 @@ class AbstractOrderMatchEvent(OrderEventInterface):
     @staticmethod
     @final
     def _process_order_match(order: OrderModel, dto: MatchDto) -> OrderModel:
-        order.take_asset_class = AssetClassEnum.XTZ
-        order.take_value = Xtz(order.make_price) * dto.match_amount
         order.make_stock -= dto.match_amount
-        order.fill = Xtz(order.fill) + order.take_value
+        order.fill += dto.match_amount
 
         if order.make_stock <= 0:
             order.status = OrderStatusEnum.FILLED
@@ -187,10 +184,8 @@ class AbstractOrderMatchEvent(OrderEventInterface):
         match_activity.type = ActivityTypeEnum.ORDER_MATCH
         match_activity.taker = transaction.data.sender_address
 
-        match_activity.amount = dto.match_amount
-
-        match_activity.take_asset_class = AssetClassEnum.XTZ
-        match_activity.take_value = Xtz(match_activity.sell_price) * dto.match_amount
+        match_activity.make_value = dto.match_amount
+        match_activity.take_value = AssetValue(match_activity.sell_price * dto.match_amount)
 
         await match_activity.save()
 
