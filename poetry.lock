@@ -323,7 +323,7 @@ pytezos = ["pytezos (>=3.2.4,<4.0.0)"]
 type = "git"
 url = "https://github.com/dipdup-net/dipdup-py.git"
 reference = "feat/token-index"
-resolved_reference = "ac15db5db519726fe3ff098d1cfc370694af47c3"
+resolved_reference = "d18ab37b38edcee35a302ccdc41831046192f06b"
 
 [[package]]
 name = "dnspython"
