@@ -6,7 +6,7 @@ source_dir := rarible_marketplace_indexer
 unit_tests_dir := tests
 
 install:
-	poetry install `if [ "${DEV}" = "0" ]; then echo "--without dev"; fi`
+	poetry install `if [ "${DEV}" = "0" ]; then echo "--no-dev"; fi`
 
 isort:
 	$(py) isort $(source_dir) $(unit_tests_dir)

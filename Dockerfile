@@ -1,6 +1,5 @@
 ARG PYTHON_VERSION=3.10
 ARG SOURCE_DIR=rarible_marketplace_indexer
-ARG POETRY_PREVIEW=1
 ARG POETRY_PATH=/opt/poetry
 ARG VENV_PATH=/opt/venv
 ARG APP_PATH=/opt/app
@@ -11,7 +10,6 @@ FROM python:${PYTHON_VERSION}-slim-buster as builder-base
 
 ARG VENV_PATH
 ARG POETRY_PATH
-ARG POETRY_PREVIEW
 ENV PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
@@ -45,7 +43,7 @@ FROM builder-base as builder-production
 
 COPY ["poetry.lock", "pyproject.toml", "./"]
 
-RUN poetry install --without dev --sync --no-interaction --no-ansi -vvv \
+RUN poetry install --no-dev --remove-untracked --no-interaction --no-ansi -vvv \
  && rm -rf /tmp \
  && rm -rf /root/.cache \
  && rm -rf $VIRTUAL_ENV/src \

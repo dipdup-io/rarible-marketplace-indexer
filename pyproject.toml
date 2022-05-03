@@ -12,12 +12,12 @@ dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "feat/to
 aiokafka = "^0.7.2"
 base58 = "^2.1.1"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.dev-dependencies]
 ssort = "^0.11.5"
-mypy = "^0.942"
+mypy = "^0.950"
 isort = "^5.10.1"
 flakeheaven = "^0.11.1"
-pytest = "^7.1.1"
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
