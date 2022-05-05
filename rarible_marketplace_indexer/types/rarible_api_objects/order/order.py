@@ -17,6 +17,7 @@ class RaribleApiOrder(AbstractRaribleApiObject):
     class Config:
         alias_generator = camelize
         allow_population_by_field_name = True
+        use_enum_values = True
 
     _kafka_topic = KafkaTopic.ORDER_TOPIC
     fill: Xtz

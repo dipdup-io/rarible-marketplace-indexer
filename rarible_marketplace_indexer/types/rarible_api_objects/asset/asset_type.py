@@ -20,7 +20,7 @@ class AbstractAssetType(BaseModel, ABC):
 
 
 class XtzAssetType(AbstractAssetType):
-    asset_class: Literal[AssetClassEnum.XTZ]
+    asset_class: Literal[AssetClassEnum.XTZ] = AssetClassEnum.XTZ
 
 
 class AbstractTokenAssetType(AbstractAssetType, ABC):
@@ -29,15 +29,15 @@ class AbstractTokenAssetType(AbstractAssetType, ABC):
 
 
 class FungibleTokenAssetType(AbstractTokenAssetType):
-    asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN]
+    asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN] = AssetClassEnum.FUNGIBLE_TOKEN
 
 
 class NonFungibleTokenAssetType(AbstractTokenAssetType):
-    asset_class: Literal[AssetClassEnum.NON_FUNGIBLE_TOKEN]
+    asset_class: Literal[AssetClassEnum.NON_FUNGIBLE_TOKEN] = AssetClassEnum.NON_FUNGIBLE_TOKEN
 
 
 class MultiTokenAssetType(AbstractTokenAssetType):
-    asset_class: Literal[AssetClassEnum.MULTI_TOKEN]
+    asset_class: Literal[AssetClassEnum.MULTI_TOKEN] = AssetClassEnum.MULTI_TOKEN
 
 
 TokenAssetType = Union[FungibleTokenAssetType, NonFungibleTokenAssetType, MultiTokenAssetType]

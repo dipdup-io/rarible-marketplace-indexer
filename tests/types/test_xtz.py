@@ -1,4 +1,7 @@
+import math
 from decimal import Decimal
+from random import choice
+from string import digits
 
 import pytest
 
@@ -47,15 +50,27 @@ class TestXtz:
         'utz_value, expected',
         (
             (127001, '0.127001'),
-            (127001.10, '0.127001'),
+            (127001.000000_1, '0.127001'),
             (30_000_000, '30'),
             (500_000_000, '500'),
-            ('500_000_000', '500'),
+            ('-500_000_000', '-500'),
         ),
     )
-    def test_from_u_tezos(self, utz_value, expected):
+    def test_from_u_tezos_positive(self, utz_value, expected):
         xtz = Xtz.from_u_tezos(utz_value)
-        assert xtz >= expected
+        assert xtz == expected
+
+    @pytest.mark.parametrize(
+        'invalid_utz_value',
+        (
+            127001.000001_0,
+            math.pi,
+            math.sqrt(3),
+        ),
+    )
+    def test_from_u_tezos_negative(self, invalid_utz_value):
+        with pytest.raises(ValueError):
+            Xtz.from_u_tezos(invalid_utz_value)
 
     def test_arithmetic(self):
         assert Xtz(1.0000011) - Xtz(1.000001) == 0
@@ -64,7 +79,14 @@ class TestXtz:
         assert Xtz(18).sqrt() == '4.242641'
         assert (Xtz(5) * 3 + Xtz(35)) == 50
 
-    def test_too_many_digits(self):
+    @pytest.mark.parametrize('digits_amount', (3, 10, 36, 94, 158, 171))
+    @pytest.mark.parametrize('point_position', (-1, -5, -8, -20))
+    def test_context_limitations(self, digits_amount, point_position):
+        digits_string = ''.join(choice(digits) for _ in range(digits_amount))
+        number_string = digits_string[:point_position] + '.' + digits_string[point_position:]
+        assert Xtz(number_string)
+
+    def test_too_many_digits_issue(self):
         """
         see: https://better-call.dev/mainnet/opg/ooiZQuVH8ATmZ6w8JuLvtygy2ScqvoxedJjuvG9NbbL8X318zRq/contents
         """

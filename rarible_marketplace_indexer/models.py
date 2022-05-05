@@ -1,7 +1,12 @@
+import uuid
 from enum import Enum
+from typing import Any
 from typing import List
 from typing import Optional
+from typing import TypeVar
+from uuid import uuid5
 
+from dipdup.models import Transaction
 from tortoise import fields
 from tortoise.backends.base.client import BaseDBAsyncClient
 from tortoise.models import Model
@@ -14,35 +19,41 @@ from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value impor
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import AccountAddressField
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OperationHashField
 
-
-class OrderStatusEnum(Enum):
-    ACTIVE: str = 'ACTIVE'
-    FILLED: str = 'FILLED'
-    HISTORICAL: str = 'HISTORICAL'
-    INACTIVE: str = 'INACTIVE'
-    CANCELLED: str = 'CANCELLED'
+_StrEnumValue = TypeVar("_StrEnumValue")
 
 
-class ActivityTypeEnum(Enum):
-    LIST: str = 'LIST'
-    MATCH: str = 'SELL'
-    CANCEL: str = 'CANCEL_LIST'
+class OrderStatusEnum(str, Enum):
+    ACTIVE: _StrEnumValue = 'ACTIVE'
+    FILLED: _StrEnumValue = 'FILLED'
+    HISTORICAL: _StrEnumValue = 'HISTORICAL'
+    INACTIVE: _StrEnumValue = 'INACTIVE'
+    CANCELLED: _StrEnumValue = 'CANCELLED'
 
 
-class PlatformEnum(Enum):
-    HEN: str = 'Hen'
-    OBJKT: str = 'Objkt'
-    OBJKT_V2: str = 'Objkt_v2'
-    RARIBLE: str = 'Rarible'
+class ActivityTypeEnum(str, Enum):
+    ORDER_LIST: _StrEnumValue = 'LIST'
+    ORDER_MATCH: _StrEnumValue = 'SELL'
+    ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    TOKEN_MINT: _StrEnumValue = 'MINT'
+    TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
+    TOKEN_BURN: _StrEnumValue = 'BURN'
 
 
-class Activity(Model):
+class PlatformEnum(str, Enum):
+    HEN: _StrEnumValue = 'Hen'
+    OBJKT: _StrEnumValue = 'Objkt'
+    OBJKT_V2: _StrEnumValue = 'Objkt_v2'
+    RARIBLE: _StrEnumValue = 'Rarible'
+
+
+class ActivityModel(Model):
     class Meta:
         table = 'marketplace_activity'
 
     _custom_generated_pk = True
 
-    id = fields.BigIntField(pk=True)
+    id = fields.UUIDField(pk=True, generated=False, required=True, default=None)
+    order_id = fields.UUIDField(required=True, index=True)
     type = fields.CharEnumField(ActivityTypeEnum)
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
@@ -62,15 +73,44 @@ class Activity(Model):
     operation_level = fields.IntField()
     operation_timestamp = fields.DatetimeField()
     operation_hash = OperationHashField()
+    operation_counter = fields.IntField()
+    operation_nonce = fields.IntField(null=True)
+
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(operation_hash, operation_counter, operation_nonce, *args, **kwargs):
+        assert operation_hash
+        assert operation_counter
+
+        oid = '.'.join(map(str, filter(bool, [operation_hash, operation_counter, operation_nonce])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
+    def apply(self, transaction: Transaction):
+        new_id = self.get_id(transaction.data.hash, transaction.data.counter, transaction.data.nonce)
+        activity = self.clone(pk=new_id)
+
+        activity.operation_level = transaction.data.level
+        activity.operation_timestamp = transaction.data.timestamp
+        activity.operation_hash = transaction.data.hash
+        activity.operation_counter = transaction.data.counter
+        activity.operation_nonce = transaction.data.nonce
+
+        return activity
 
 
-class Order(Model):
+class OrderModel(Model):
     class Meta:
         table = 'marketplace_order'
 
     _custom_generated_pk = True
 
-    id = fields.BigIntField(pk=True, generated=False)
+    id = fields.UUIDField(pk=True, generated=False, required=True)
     network = fields.CharField(max_length=16, index=True)
     fill = XtzField(default=0)
     platform = fields.CharEnumField(PlatformEnum, index=True)
@@ -95,28 +135,44 @@ class Order(Model):
     take_token_id = fields.TextField(null=True)
     take_value = AssetValueField(null=True)
 
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
 
-@post_save(Order)
+    @staticmethod
+    def get_id(network, platform, internal_order_id, *args, **kwargs):
+        assert network
+        assert platform
+        assert internal_order_id
+
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
+
+@post_save(OrderModel)
 async def signal_order_post_save(
-    sender: Order,
-    instance: Order,
+    sender: OrderModel,
+    instance: OrderModel,
     created: bool,
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
+    from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import RaribleApiOrderFactory
 
-    await producer_send(OrderFactory.build(instance))
+    await producer_send(RaribleApiOrderFactory.build(instance))
 
 
-@post_save(Activity)
+@post_save(ActivityModel)
 async def signal_activity_post_save(
-    sender: Activity,
-    instance: Activity,
+    sender: ActivityModel,
+    instance: ActivityModel,
     created: bool,
     using_db: "Optional[BaseDBAsyncClient]",
     update_fields: List[str],
 ) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.activity.factory import ActivityFactory
+    from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.factory import RaribleApiOrderActivityFactory
 
-    await producer_send(ActivityFactory.build(instance))
+    await producer_send(RaribleApiOrderActivityFactory.build(instance))

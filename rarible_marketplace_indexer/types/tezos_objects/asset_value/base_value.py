@@ -1,6 +1,7 @@
 from decimal import Context
 from decimal import Decimal
 from decimal import InvalidOperation
+from decimal import localcontext
 from typing import Any
 from typing import Optional
 from typing import Type
@@ -21,20 +22,21 @@ class BaseValue(Decimal, metaclass=CustomDecimalMetaClass):
         if cls is BaseValue:
             raise NotImplementedError
         context = Context(prec=cls.asset_max_digits)
-        asset_precision_exp = Decimal(f'1E-{cls.asset_precision}')
-        try:
-            value = Decimal(value)
-            if value.to_integral(context=context) == value:
-                value = value.quantize(Decimal(1))
-            else:
-                value = value.quantize(asset_precision_exp, context=context).normalize(context)
+        with localcontext(context):
+            asset_precision_exp = Decimal(f'1E-{cls.asset_precision}')
+            try:
+                value = Decimal(value)
+                if value.to_integral() == value:
+                    value = value.quantize(Decimal(1))
+                else:
+                    value = value.quantize(asset_precision_exp).normalize(context)
 
-        except InvalidOperation:
-            # covered in tests.asset.test_xtz.TestXtz.test_too_many_digits
-            value = 0
-            cls._logger.warning('Decimal Invalid Operation Error: too many digits')
+            except InvalidOperation as exception:
+                # covered in tests.asset.test_xtz.TestXtz.test_too_many_digits
+                value = 0
+                cls._logger.exception(f'Decimal Invalid Operation: {exception}')
 
-        return Decimal.__new__(cls, value)
+            return Decimal.__new__(cls, value)
 
     @classmethod
     def __get_validators__(cls):
@@ -62,10 +64,13 @@ class BaseValueField(DecimalField):
 
     def __init__(self, **kwargs: Any) -> None:
         self.max_digits = self.python_class.asset_max_digits
-        super().__init__(self.max_digits, self.python_class.asset_precision, **kwargs)
+        self.decimal_places = self.python_class.asset_precision
+        super().__init__(self.max_digits, self.decimal_places, **kwargs)
 
     def to_python_value(self, value: Any) -> Optional[Decimal]:
-        if value is not None:
+        if value is None:
+            value = None
+        else:
             value = self.python_class(value)
         self.validate(value)
         return value

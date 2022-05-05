@@ -1,11 +1,11 @@
-from rarible_marketplace_indexer.models import Order
+from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import Asset
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 
 
-class OrderFactory:
+class RaribleApiOrderFactory:
     @staticmethod
-    def build(order: Order) -> RaribleApiOrder:
+    def build(order: OrderModel) -> RaribleApiOrder:
         return RaribleApiOrder(
             id=order.id,
             network=order.network,

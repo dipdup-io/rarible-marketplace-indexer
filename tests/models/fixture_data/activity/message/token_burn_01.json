@@ -1,0 +1,13 @@
+{
+  "id": "4bcc5eba-52b2-571f-b6e3-d7183894bfb5",
+  "network": "mainnet",
+  "type": "BURN",
+  "transferId": "205699817",
+  "owner": "tz1gs8ewUnVXgAdaBdZmF4q6su6PZ5vWgaCe",
+  "contract": "KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS",
+  "tokenId": "58000",
+  "value": "10",
+  "transactionId": "205699797",
+  "reverted": false,
+  "date": "2022-04-14T08:24:29+00:00"
+}

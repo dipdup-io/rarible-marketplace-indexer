@@ -1,17 +1,19 @@
 from rarible_marketplace_indexer.producer.serializer import kafka_value_serializer
-from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import OrderFactory
+from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import RaribleApiOrderFactory
+from tests.models.conftest import compare_kafka_messages
 
 
 class TestRaribleApiOrder:
-    def test_serializer(self, listed_order_model):
-        order_api_object = OrderFactory.build(listed_order_model)
-        assert order_api_object.id == '170668029'
-        order_message = kafka_value_serializer(order_api_object)
-        assert (
-            b'"make": {"assetType": {"assetClass": "TEZOS_FT", "contract": "KT1Q8JB2bdphCHhEBKc1PMsjArLPcAezGBVK", "tokenId": "2"}, "assetValue": 10}'
-            in order_message
-        )
-
-    def test_kafka_topic(self, listed_order_model):
-        order_api_object = OrderFactory.build(listed_order_model)
+    def test_kafka_topic(self, order_data_provider):
+        order_api_object = RaribleApiOrderFactory.build(order_data_provider.test_model)
         assert order_api_object.kafka_topic == 'order_topic_mainnet'
+
+    def test_factory(self, order_data_provider):
+        order_api_object = RaribleApiOrderFactory.build(order_data_provider.test_model)
+        expected_object = order_data_provider.test_api_object
+        assert order_api_object == expected_object
+
+    def test_serializer(self, order_data_provider):
+        order_message = kafka_value_serializer(order_data_provider.test_api_object, sort_keys=True)
+        expected_message = order_data_provider.test_message
+        compare_kafka_messages(order_message, expected_message)
