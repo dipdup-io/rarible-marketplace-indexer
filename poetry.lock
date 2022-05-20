@@ -286,7 +286,7 @@ http = ["httpx"]
 
 [[package]]
 name = "dipdup"
-version = "5.0.2"
+version = "5.1.1"
 description = "Python SDK for developing indexers of Tezos smart contracts inspired by The Graph"
 category = "main"
 optional = false

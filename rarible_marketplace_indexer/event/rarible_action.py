@@ -17,6 +17,8 @@ from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.event.dto import TakeDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.buy import BuyParameter
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.cancel_sale import CancelSaleParameter
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.sell import SellParameter
@@ -162,4 +164,40 @@ class RaribleOrderMatchEvent(AbstractOrderMatchEvent):
             internal_order_id=internal_order_id,
             match_amount=AssetValue(1),
             match_timestamp=transaction.data.timestamp,
+        )
+
+class RariblePutBidtEvent(AbstractOrderListEvent):
+    platform = PlatformEnum.RARIBLE
+    RariblePutBidTransaction = Transaction[PutBidParameter, RaribleBidsStorage]
+
+    @staticmethod
+    def _get_list_dto(
+        transaction: RariblePutBidTransaction,
+        datasource: TzktDatasource,
+    ) -> ListDto:
+        internal_order_id = RaribleAware.get_order_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.s_asset_contract),
+            token_id=int(transaction.parameter.s_asset_token_id),
+            seller=ImplicitAccountAddress(transaction.data.sender_address),
+        )
+
+        take = RaribleAware.get_take_dto(
+            sale_type=int(transaction.parameter.s_sale_type),
+            value=int(transaction.parameter.s_sale.sale_amount),
+            asset_bytes=bytes.fromhex(transaction.parameter.s_sale_asset),
+        )
+        make_value = AssetValue(transaction.parameter.s_sale.sale_asset_qty)
+        make_price = AssetValue(take.value / make_value)
+
+        return ListDto(
+            internal_order_id=internal_order_id,
+            maker=ImplicitAccountAddress(transaction.data.sender_address),
+            make_price=make_price,
+            make=MakeDto(
+                asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
+                contract=OriginatedAccountAddress(transaction.parameter.s_asset_contract),
+                token_id=int(transaction.parameter.s_asset_token_id),
+                value=make_value,
+            ),
+            take=take,
         )

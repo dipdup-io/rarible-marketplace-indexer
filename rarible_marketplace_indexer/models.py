@@ -151,6 +151,43 @@ class OrderModel(Model):
         oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
+class BidModel(Model):
+    class Meta:
+        table = 'marketplace_bid'
+
+    _custom_generated_pk = True
+
+    id = fields.UUIDField(pk=True, generated=False, required=True)
+    internal_bid_id = fields.CharField(max_length=32, index=True)
+    network = fields.CharField(max_length=16, index=True)
+    platform = fields.CharEnumField(PlatformEnum, index=True)
+    created_at = fields.DatetimeField(index=True)
+    last_updated_at = fields.DatetimeField(index=True)
+    make_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
+    make_contract = AccountAddressField(null=True)
+    make_token_id = fields.TextField(null=True)
+    make_value = AssetValueField()
+    taker = AccountAddressField(null=True)
+    take_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
+    take_contract = AccountAddressField(null=True)
+    take_token_id = fields.TextField(null=True)
+    take_value = AssetValueField(null=True)
+
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(network, platform, internal_order_id, *args, **kwargs):
+        assert network
+        assert platform
+        assert internal_order_id
+
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 @post_save(OrderModel)
 async def signal_order_post_save(

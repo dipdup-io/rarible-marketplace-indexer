@@ -8,14 +8,14 @@ from dipdup.models import Transaction
 from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
-from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import ActivityModel, BidModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 
 
-class OrderEventInterface(ABC):
+class EventInterface(ABC):
     platform: str = NotImplemented
 
     @classmethod
@@ -24,7 +24,7 @@ class OrderEventInterface(ABC):
         raise NotImplementedError
 
 
-class AbstractOrderListEvent(OrderEventInterface):
+class AbstractOrderListEvent(EventInterface):
     @staticmethod
     @abstractmethod
     def _get_list_dto(
@@ -91,7 +91,7 @@ class AbstractOrderListEvent(OrderEventInterface):
         )
 
 
-class AbstractOrderCancelEvent(OrderEventInterface):
+class AbstractOrderCancelEvent(EventInterface):
     @staticmethod
     @abstractmethod
     def _get_cancel_dto(
@@ -141,7 +141,7 @@ class AbstractOrderCancelEvent(OrderEventInterface):
         await order.save()
 
 
-class AbstractOrderMatchEvent(OrderEventInterface):
+class AbstractOrderMatchEvent(EventInterface):
     @staticmethod
     @abstractmethod
     def _get_match_dto(
@@ -199,3 +199,61 @@ class AbstractOrderMatchEvent(OrderEventInterface):
         order = cls._process_order_match(order, dto)
 
         await order.save()
+
+class AbstractPutBidEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_list_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> ListDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_list_dto(transaction, datasource)
+        if not dto.started_at:
+            dto.started_at = transaction.data.timestamp
+
+        order = await BidModel.create(
+            network=datasource.network,
+            platform=cls.platform,
+            created_at=transaction.data.timestamp,
+            last_updated_at=transaction.data.timestamp,
+            make_asset_class=dto.make.asset_class,
+            make_contract=dto.make.contract,
+            make_token_id=dto.make.token_id,
+            make_value=dto.make.value,
+            take_asset_class=dto.take.asset_class,
+            take_contract=dto.take.contract,
+            take_token_id=dto.take.token_id,
+            take_value=dto.take.value,
+        )
+
+        await ActivityModel.create(
+            type=ActivityTypeEnum.ORDER_LIST,
+            network=datasource.network,
+            platform=cls.platform,
+            order_id=order.id,
+            internal_order_id=dto.internal_order_id,
+            maker=dto.maker,
+            make_asset_class=dto.make.asset_class,
+            make_contract=dto.make.contract,
+            make_token_id=dto.make.token_id,
+            make_value=dto.make.value,
+            take_asset_class=dto.take.asset_class,
+            take_contract=dto.take.contract,
+            take_token_id=dto.take.token_id,
+            take_value=dto.take.value,
+            sell_price=dto.make_price,
+            operation_level=transaction.data.level,
+            operation_timestamp=transaction.data.timestamp,
+            operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
+        )

@@ -47,3 +47,11 @@ class MatchDto:
     internal_order_id: str
     match_amount: AssetValue
     match_timestamp: datetime
+
+
+@dataclass
+class BidDto:
+    internal_bid_id: str
+    take_price: BaseValue
+    make: MakeDto
+    take: TakeDto

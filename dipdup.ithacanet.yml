@@ -29,3 +29,13 @@ indexes:
         pattern:
           - destination: rarible_exchange_ithacanet
             entrypoint: buy
+    rarible_bid_actions:
+      kind: operation
+      datasource: tzkt_ithacanet
+      contracts:
+        - rarible_bids_ithacanet
+      handlers:
+        - callback: rarible_put_bid
+          pattern:
+            - destination: rarible_bids_ithacanet
+              entrypoint: put_bid
