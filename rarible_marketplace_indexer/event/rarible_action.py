@@ -160,6 +160,6 @@ class RaribleOrderMatchEvent(AbstractOrderMatchEvent):
 
         return MatchDto(
             internal_order_id=internal_order_id,
-            match_amount=AssetValue(1),
+            match_amount=AssetValue(transaction.parameter.b_amount),
             match_timestamp=transaction.data.timestamp,
         )
