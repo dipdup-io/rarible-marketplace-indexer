@@ -34,5 +34,6 @@ class BuyParameter(BaseModel):
     b_seller: str
     b_sale_type: str
     b_sale_asset: str
+    b_amount: str
     b_origin_fees: List[BOriginFee]
     b_payouts: List[BPayout]
