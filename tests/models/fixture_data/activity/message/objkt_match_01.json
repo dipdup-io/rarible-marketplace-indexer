@@ -9,7 +9,7 @@
    "reverted": false,
    "nft": {
       "assetType": {
-         "assetClass": "TEZOS_FT",
+         "assetClass": "TEZOS_MT",
          "contract": "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
          "tokenId": "157097"
       },
