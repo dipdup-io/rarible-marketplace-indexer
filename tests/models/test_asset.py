@@ -14,7 +14,7 @@ class TestAsset:
                 'asset_value': '10.0000011',
             },
             {
-                'asset_type': {'asset_class': 'TEZOS_FT', 'contract': 'KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn', 'token_id': 42},
+                'asset_type': {'asset_class': 'TEZOS_MT', 'contract': 'KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn', 'token_id': 42},
                 'asset_value': '127_000_000_000_000_000_000_000_000_000.00000111111',
             },
             {

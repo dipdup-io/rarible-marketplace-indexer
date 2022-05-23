@@ -7,7 +7,7 @@ from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import TokenAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import XtzAsset
-from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import FungibleTokenAssetType
+from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import MultiTokenAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import XtzAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
@@ -31,7 +31,7 @@ order_api_object = RaribleApiOrder(
     maker=ImplicitAccountAddress('tz2NY3Fgt5QufrYGP1JKdvLKcWWt86sLsqrS'),
     taker=None,
     make=TokenAsset(
-        asset_type=FungibleTokenAssetType(
+        asset_type=MultiTokenAssetType(
             contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
             token_id='49575',
         ),
