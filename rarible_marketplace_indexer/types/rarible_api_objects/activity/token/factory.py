@@ -18,13 +18,10 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Or
 class RaribleApiTokenActivityFactory:
     @classmethod
     def _build_base_activity(cls, transfer_data: TokenTransferData, datasource: TzktDatasource) -> BaseRaribleApiTokenActivity:
-        value = AssetValue(transfer_data.amount)
         try:
-            decimals = int(transfer_data.metadata.get('decimals', 0))
-            if decimals > 0:
-                value = value / 10**decimals
-        except (ValueError, AttributeError, KeyError):
-            pass
+            value = AssetValue(transfer_data.amount)
+        except TypeError:
+            value = AssetValue(0)
 
         transaction_id = list(
             filter(
