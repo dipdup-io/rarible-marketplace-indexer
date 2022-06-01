@@ -8,7 +8,7 @@ from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderMatchActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import TokenAsset
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import XtzAsset
-from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import FungibleTokenAssetType
+from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import MultiTokenAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import XtzAssetType
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
@@ -26,7 +26,7 @@ activity_api_object = RaribleApiOrderMatchActivity(
     date=datetime(2021, 7, 1, 21, 9, 38, tzinfo=UTC),
     reverted=False,
     nft=TokenAsset(
-        asset_type=FungibleTokenAssetType(
+        asset_type=MultiTokenAssetType(
             contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
             token_id='157097',
         ),

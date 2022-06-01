@@ -38,7 +38,7 @@ class ObjktOrderListEvent(AbstractOrderListEvent):
             maker=ImplicitAccountAddress(transaction.data.sender_address),
             make_price=make_price,
             make=MakeDto(
-                asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
+                asset_class=AssetClassEnum.MULTI_TOKEN,
                 contract=OriginatedAccountAddress(transaction.parameter.fa2),
                 token_id=int(transaction.parameter.objkt_id),
                 value=make_value,

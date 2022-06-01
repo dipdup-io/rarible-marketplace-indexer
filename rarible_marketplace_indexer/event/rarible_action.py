@@ -137,7 +137,7 @@ class RaribleOrderListEvent(AbstractOrderListEvent):
             maker=ImplicitAccountAddress(transaction.data.sender_address),
             make_price=make_price,
             make=MakeDto(
-                asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
+                asset_class=AssetClassEnum.MULTI_TOKEN,
                 contract=OriginatedAccountAddress(transaction.parameter.s_asset_contract),
                 token_id=int(transaction.parameter.s_asset_token_id),
                 value=make_value,
@@ -179,7 +179,7 @@ class RaribleOrderMatchEvent(AbstractOrderMatchEvent):
 
         return MatchDto(
             internal_order_id=internal_order_id,
-            match_amount=AssetValue(1),
+            match_amount=AssetValue(transaction.parameter.b_amount),
             match_timestamp=transaction.data.timestamp,
         )
 
