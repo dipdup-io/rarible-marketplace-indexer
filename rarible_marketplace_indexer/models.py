@@ -166,50 +166,6 @@ class OrderModel(Model):
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 
-class BidModel(Model):
-    class Meta:
-        table = 'marketplace_bid'
-
-    _custom_generated_pk = True
-
-    id = fields.UUIDField(pk=True, generated=False, required=True)
-    internal_order_id = fields.CharField(max_length=32, index=True)
-    network = fields.CharField(max_length=16, index=True)
-    platform = fields.CharEnumField(PlatformEnum, index=True)
-    created_at = fields.DatetimeField(index=True)
-    ended_at = fields.DatetimeField(null=True)
-    last_updated_at = fields.DatetimeField(index=True)
-    make_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
-    make_contract = AccountAddressField(null=True)
-    make_token_id = fields.TextField(null=True)
-    make_value = AssetValueField()
-    bidder = AccountAddressField(null=True)
-    seller = AccountAddressField(null=True)
-    take_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
-    take_contract = AccountAddressField(null=True)
-    take_token_id = fields.TextField(null=True)
-    take_value = AssetValueField(null=True)
-    status = fields.CharEnumField(OrderStatusEnum, index=True)
-
-    def __init__(self, **kwargs: Any) -> None:
-        try:
-            kwargs['id'] = self.get_id(**kwargs)
-        except TypeError:
-            pass
-        super().__init__(**kwargs)
-
-    @staticmethod
-    def get_id(network, platform, internal_order_id, bidder, created_at, *args, **kwargs):
-        assert network
-        assert platform
-        assert internal_order_id
-        assert bidder
-        assert created_at
-
-        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, bidder, created_at])))
-        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
-
-
 @post_save(OrderModel)
 async def signal_order_post_save(
     sender: OrderModel,
@@ -221,19 +177,6 @@ async def signal_order_post_save(
     from rarible_marketplace_indexer.types.rarible_api_objects.order.factory import RaribleApiOrderFactory
 
     await producer_send(RaribleApiOrderFactory.build(instance))
-
-
-@post_save(BidModel)
-async def signal_bid_post_save(
-    sender: BidModel,
-    instance: BidModel,
-    created: bool,
-    using_db: "Optional[BaseDBAsyncClient]",
-    update_fields: List[str],
-) -> None:
-    from rarible_marketplace_indexer.types.rarible_api_objects.bid.factory import RaribleApiBidFactory
-
-    await producer_send(RaribleApiBidFactory.build(instance))
 
 
 @post_save(ActivityModel)

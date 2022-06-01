@@ -15,7 +15,8 @@ from _pytest.fixtures import SubRequest
 from pydantic import BaseModel
 from tortoise.models import Model
 
-from rarible_marketplace_indexer.models import ActivityModel, BidModel
+from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import BidModel
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.bid.bid import RaribleApiBid
@@ -92,9 +93,11 @@ def data_loader(object_type: str):
 def order_data_provider(request: SubRequest):
     return request.param
 
+
 @pytest.fixture(params=data_loader(TestingSubject.order))
 def bid_data_provider(request: SubRequest):
     return request.param
+
 
 @pytest.fixture(params=filter(lambda x: x.test_model is not None, data_loader(TestingSubject.activity)))
 def activity_model_data_provider(request: SubRequest):

@@ -13,8 +13,8 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Or
 @dataclass
 class MakeDto:
     asset_class: AssetClassEnum
-    contract: OriginatedAccountAddress
-    token_id: int
+    contract: Optional[OriginatedAccountAddress]
+    token_id: Optional[int]
     value: AssetValue
 
 
@@ -45,31 +45,7 @@ class CancelDto:
 @dataclass
 class MatchDto:
     internal_order_id: str
-    match_amount: AssetValue
-    match_timestamp: datetime
-
-
-@dataclass
-class BidDto:
-    internal_order_id: str
-    take_price: BaseValue
-    bidder: str
-    make: MakeDto
-    take: TakeDto
-
-
-@dataclass
-class AcceptBidDto:
-    internal_order_id: str
-    bidder: str
-    seller: str
-    match_timestamp: datetime
-
-
-@dataclass
-class AcceptFloorBidDto:
-    internal_order_id: str
-    token_id: int
-    bidder: str
-    seller: str
+    taker: str
+    token_id: Optional[int]
+    match_amount: Optional[AssetValue]
     match_timestamp: datetime

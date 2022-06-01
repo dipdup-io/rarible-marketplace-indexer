@@ -35,5 +35,5 @@ bid_api_object = RaribleApiBid(
     take=XtzAsset(
         asset_type=XtzAssetType(),
         asset_value=Xtz(0.01),
-    )
+    ),
 )
