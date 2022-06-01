@@ -16,7 +16,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Im
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import OriginatedAccountAddress
 
 order_api_object = RaribleApiOrder(
-    id=UUID('1fa0e1f7-24c1-5cfe-bec8-af34cc7d69c2'),
+    id=UUID('212f2aee-fff9-5037-a800-fc69807bbd3c'),
     network='mainnet',
     fill=Xtz(9),
     platform=PlatformEnum.HEN,
