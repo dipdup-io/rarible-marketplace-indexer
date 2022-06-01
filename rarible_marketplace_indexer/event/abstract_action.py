@@ -251,7 +251,7 @@ class AbstractPutBidEvent(EventInterface):
             bid.save()
 
         await ActivityModel.create(
-            type=ActivityTypeEnum.PUT_BID,
+            type=ActivityTypeEnum.MAKE_BID,
             network=datasource.network,
             platform=cls.platform,
             order_id=bid.id,
@@ -321,7 +321,7 @@ class AbstractPutFloorBidEvent(EventInterface):
             bid.save()
 
         await ActivityModel.create(
-            type=ActivityTypeEnum.PUT_FLOOR_BID,
+            type=ActivityTypeEnum.MAKE_FLOOR_BID,
             network=datasource.network,
             platform=cls.platform,
             order_id=bid.id,
@@ -379,7 +379,7 @@ class AbstractAcceptBidEvent(EventInterface):
         )
         accept_bid_activity = last_put_bid_activity.apply(transaction)
 
-        accept_bid_activity.type = ActivityTypeEnum.ACCEPT_BID
+        accept_bid_activity.type = ActivityTypeEnum.GET_BID
         accept_bid_activity.maker = transaction.data.sender_address
 
         await accept_bid_activity.save()
@@ -431,7 +431,7 @@ class AbstractAcceptFloorBidEvent(EventInterface):
         )
         accept_bid_activity = last_put_bid_activity.apply(transaction)
 
-        accept_bid_activity.type = ActivityTypeEnum.ACCEPT_BID
+        accept_bid_activity.type = ActivityTypeEnum.GET_FLOOR_BID
         accept_bid_activity.taker = transaction.data.sender_address
 
         await accept_bid_activity.save()
@@ -476,7 +476,7 @@ class AbstractBidCancelEvent(EventInterface):
         )
         cancel_activity = last_bid_activity.apply(transaction)
 
-        cancel_activity.type = ActivityTypeEnum.BID_CANCEL
+        cancel_activity.type = ActivityTypeEnum.CANCEL_BID
         await cancel_activity.save()
 
         bid = (
@@ -525,7 +525,7 @@ class AbstractFloorBidCancelEvent(EventInterface):
         )
         cancel_activity = last_bid_activity.apply(transaction)
 
-        cancel_activity.type = ActivityTypeEnum.BID_CANCEL
+        cancel_activity.type = ActivityTypeEnum.CANCEL_FLOOR_BID
         await cancel_activity.save()
 
         bid = (

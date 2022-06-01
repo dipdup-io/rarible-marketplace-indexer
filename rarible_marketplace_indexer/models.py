@@ -37,15 +37,15 @@ class OrderStatusEnum(str, Enum):
 
 
 class ActivityTypeEnum(str, Enum):
-    ACCEPT_BID: _StrEnumValue = 'ACCEPT_BID'
-    ACCEPT_FLOOR_BID: _StrEnumValue = 'ACCEPT_FLOOR_BID'
+    GET_BID: _StrEnumValue = 'GET_BID'
+    GET_FLOOR_BID: _StrEnumValue = 'GET_FLOOR_BID'
     ORDER_LIST: _StrEnumValue = 'LIST'
     ORDER_MATCH: _StrEnumValue = 'SELL'
     ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
-    BID_CANCEL: _StrEnumValue = 'BID_CANCEL'
-    FLOOR_BID_CANCEL: _StrEnumValue = 'FLOOR_BID_CANCEL'
-    PUT_BID: _StrEnumValue = 'PUT_BID'
-    PUT_FLOOR_BID: _StrEnumValue = 'PUT_FLOOR_BID'
+    CANCEL_BID: _StrEnumValue = 'CANCEL_BID'
+    CANCEL_FLOOR_BID: _StrEnumValue = 'CANCEL_FLOOR_BID'
+    MAKE_BID: _StrEnumValue = 'MAKE_BID'
+    MAKE_FLOOR_BID: _StrEnumValue = 'MAKE_FLOOR_BID'
     TOKEN_MINT: _StrEnumValue = 'MINT'
     TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
     TOKEN_BURN: _StrEnumValue = 'BURN'
