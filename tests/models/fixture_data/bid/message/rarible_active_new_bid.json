@@ -1,0 +1,20 @@
+{
+      "id": "f2e5cd60-8c23-521d-b7c6-881d59e1c6fb",
+      "bidder": "tz1U6HmK5feYQ7VzrLdho7u5aRbBssNeMsU9",
+      "created_at": "2022-06-01T10:12:15+00:00",
+      "ended_at": null,
+      "internal_order_id": "21325dffc35b5a5ba66ed8eab81edb90",
+      "last_updated_at": "2022-06-01T10:12:15+00:00",
+      "make_asset_class": "TEZOS_FT",
+      "make_contract": "KT1Uke8qc4YTfP41dGuoGC8UsgRyCtyvKPLA",
+      "make_token_id": "175",
+      "make_value": "1.000000000000000000000000000000000000",
+      "network": "ithacanet",
+      "platform": "Rarible",
+      "seller": null,
+      "status": "ACTIVE",
+      "take_asset_class": "XTZ",
+      "take_contract": null,
+      "take_token_id": null,
+      "take_value": "0.010000000000000000000000000000000000"
+}
