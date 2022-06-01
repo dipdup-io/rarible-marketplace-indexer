@@ -481,8 +481,8 @@ class AbstractBidCancelEvent(EventInterface):
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
             )
-                .order_by('-operation_level')
-                .first()
+            .order_by('-operation_level')
+            .first()
         )
         cancel_activity = last_order_activity.apply(transaction)
 
@@ -496,8 +496,8 @@ class AbstractBidCancelEvent(EventInterface):
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
             )
-                .order_by('-id')
-                .first()
+            .order_by('-id')
+            .first()
         )
 
         order.status = OrderStatusEnum.CANCELLED
@@ -531,8 +531,8 @@ class AbstractFloorBidCancelEvent(EventInterface):
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
             )
-                .order_by('-operation_level')
-                .first()
+            .order_by('-operation_level')
+            .first()
         )
         cancel_activity = last_order_activity.apply(transaction)
 
@@ -546,8 +546,8 @@ class AbstractFloorBidCancelEvent(EventInterface):
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
             )
-                .order_by('-id')
-                .first()
+            .order_by('-id')
+            .first()
         )
 
         order.status = OrderStatusEnum.CANCELLED
