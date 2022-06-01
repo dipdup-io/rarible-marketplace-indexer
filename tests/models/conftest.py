@@ -16,16 +16,13 @@ from pydantic import BaseModel
 from tortoise.models import Model
 
 from rarible_marketplace_indexer.models import ActivityModel
-from rarible_marketplace_indexer.models import BidModel
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderActivity
-from rarible_marketplace_indexer.types.rarible_api_objects.bid.bid import RaribleApiBid
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 
 
 class TestingSubject:
     order: str = 'order'
-    bid: str = 'bid'
     activity: str = 'activity'
 
 
@@ -39,11 +36,6 @@ class TestModelData:
 class TestOrderData(TestModelData):
     test_model: Optional[OrderModel]
     test_api_object: RaribleApiOrder
-
-
-class TestBidData(TestModelData):
-    test_model: Optional[BidModel]
-    test_api_object: RaribleApiBid
 
 
 class TestActivityData(TestModelData):
@@ -91,11 +83,6 @@ def data_loader(object_type: str):
 
 @pytest.fixture(params=data_loader(TestingSubject.order))
 def order_data_provider(request: SubRequest):
-    return request.param
-
-
-@pytest.fixture(params=data_loader(TestingSubject.order))
-def bid_data_provider(request: SubRequest):
     return request.param
 
 
