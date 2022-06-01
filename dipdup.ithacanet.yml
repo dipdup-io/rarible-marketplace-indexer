@@ -54,3 +54,12 @@ indexes:
         pattern:
           - destination: rarible_bids_ithacanet
             entrypoint: accept_floor_bid
+      - callback: rarible_cancel_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: cancel_bid
+      - callback: rarible_cancel_floor_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: cancel_floor_bid
+

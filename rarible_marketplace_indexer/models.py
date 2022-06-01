@@ -40,6 +40,8 @@ class ActivityTypeEnum(str, Enum):
     ORDER_LIST: _StrEnumValue = 'LIST'
     ORDER_MATCH: _StrEnumValue = 'SELL'
     ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    BID_CANCEL: _StrEnumValue = 'BID_CANCEL'
+    FLOOR_BID_CANCEL: _StrEnumValue = 'FLOOR_BID_CANCEL'
     PUT_BID: _StrEnumValue = 'PUT_BID'
     PUT_FLOOR_BID: _StrEnumValue = 'PUT_FLOOR_BID'
     TOKEN_MINT: _StrEnumValue = 'MINT'

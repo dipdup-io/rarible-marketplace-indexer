@@ -8,7 +8,7 @@ from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCancelEvent, AbstractPutBidEvent, \
-    AbstractAcceptBidEvent, AbstractAcceptFloorBidEvent
+    AbstractAcceptBidEvent, AbstractAcceptFloorBidEvent, AbstractFloorBidCancelEvent, AbstractBidCancelEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderListEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatchEvent
 from rarible_marketplace_indexer.event.dto import CancelDto, BidDto, AcceptBidDto, AcceptFloorBidDto
@@ -18,6 +18,8 @@ from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.event.dto import TakeDto
 from rarible_marketplace_indexer.models import PlatformEnum, TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter, PutFloorBidParameter, \
     AcceptBidParameter, AcceptFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
@@ -261,7 +263,7 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
 
 class RaribleAcceptBidEvent(AbstractAcceptBidEvent):
     platform = PlatformEnum.RARIBLE
-    RaribleAcceptBidTransaction = Transaction[AcceptBidParameter, RaribleExchangeStorage]
+    RaribleAcceptBidTransaction = Transaction[AcceptBidParameter, RaribleBidsStorage]
 
     @staticmethod
     def _get_accept_bid_dto(transaction: RaribleAcceptBidTransaction, datasource: TzktDatasource) -> AcceptBidDto:
@@ -283,7 +285,7 @@ class RaribleAcceptBidEvent(AbstractAcceptBidEvent):
 
 class RaribleAcceptFloorBidEvent(AbstractAcceptFloorBidEvent):
     platform = PlatformEnum.RARIBLE
-    RaribleAcceptFloorBidTransaction = Transaction[AcceptFloorBidParameter, RaribleExchangeStorage]
+    RaribleAcceptFloorBidTransaction = Transaction[AcceptFloorBidParameter, RaribleBidsStorage]
 
     @staticmethod
     def _get_accept_floor_bid_dto(transaction: RaribleAcceptFloorBidTransaction, datasource: TzktDatasource) -> AcceptFloorBidDto:
@@ -301,3 +303,35 @@ class RaribleAcceptFloorBidEvent(AbstractAcceptFloorBidEvent):
             seller=ImplicitAccountAddress(transaction.data.sender_address),
             match_timestamp=transaction.data.timestamp,
         )
+
+class RaribleBidCancelEvent(AbstractBidCancelEvent):
+    platform = PlatformEnum.RARIBLE
+    RaribleCancelBidTransaction = Transaction[CancelBidParameter, RaribleBidsStorage]
+
+    @staticmethod
+    def _get_cancel_bid_dto(transaction: RaribleCancelBidTransaction, datasource: TzktDatasource) -> CancelDto:
+        internal_order_id = RaribleAware.get_bid_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.cb_asset_contract),
+            token_id=int(transaction.parameter.cb_asset_token_id),
+            bidder=ImplicitAccountAddress(transaction.data.sender_address),
+            asset_class=transaction.parameter.cb_bid_type,
+            asset=transaction.parameter.cb_bid_asset
+        )
+
+        return CancelDto(internal_order_id=internal_order_id)
+
+
+class RaribleFloorBidCancelEvent(AbstractFloorBidCancelEvent):
+    platform = PlatformEnum.RARIBLE
+    RaribleCancelFloorBidTransaction = Transaction[CancelFloorBidParameter, RaribleBidsStorage]
+
+    @staticmethod
+    def _get_cancel_floor_bid_dto(transaction: RaribleCancelFloorBidTransaction, datasource: TzktDatasource) -> CancelDto:
+        internal_order_id = RaribleAware.get_floor_bid_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.cfb_asset_contract),
+            bidder=ImplicitAccountAddress(transaction.data.sender_address),
+            asset_class=transaction.parameter.cfb_bid_type,
+            asset=transaction.parameter.cfb_bid_asset
+        )
+
+        return CancelDto(internal_order_id=internal_order_id)

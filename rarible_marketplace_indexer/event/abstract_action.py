@@ -445,3 +445,99 @@ class AbstractAcceptFloorBidEvent(EventInterface):
         bid = cls._process_floor_bid_match(bid, dto)
 
         await bid.save()
+
+class AbstractBidCancelEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_cancel_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> CancelDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_cancel_bid_dto(transaction, datasource)
+        last_bid_activity = (
+            await ActivityModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+            )
+            .order_by('-operation_level')
+            .first()
+        )
+        cancel_activity = last_bid_activity.apply(transaction)
+
+        cancel_activity.type = ActivityTypeEnum.BID_CANCEL
+        await cancel_activity.save()
+
+        bid = (
+            await BidModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+                status=OrderStatusEnum.ACTIVE,
+            )
+            .order_by('-id')
+            .first()
+        )
+
+        bid.status = OrderStatusEnum.CANCELLED
+        bid.ended_at = transaction.data.timestamp
+        bid.last_updated_at = transaction.data.timestamp
+
+        await bid.save()
+
+class AbstractFloorBidCancelEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_cancel_floor_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> CancelDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_cancel_floor_bid_dto(transaction, datasource)
+        last_bid_activity = (
+            await ActivityModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+            )
+            .order_by('-operation_level')
+            .first()
+        )
+        cancel_activity = last_bid_activity.apply(transaction)
+
+        cancel_activity.type = ActivityTypeEnum.BID_CANCEL
+        await cancel_activity.save()
+
+        bid = (
+            await BidModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+                status=OrderStatusEnum.ACTIVE,
+            )
+            .order_by('-id')
+            .first()
+        )
+
+        bid.status = OrderStatusEnum.CANCELLED
+        bid.ended_at = transaction.data.timestamp
+        bid.last_updated_at = transaction.data.timestamp
+
+        await bid.save()
