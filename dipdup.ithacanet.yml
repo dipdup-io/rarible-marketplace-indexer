@@ -7,6 +7,9 @@ contracts:
   rarible_exchange_ithacanet:
     address: KT1QaGwLxoBqeQaWpe7HUyEFnXQfGi9P2g6a
     typename: rarible_exchange
+  rarible_bids_ithacanet:
+    address: KT1UcBbv2D84mZ9tZx4MVLbCNyC5ihJERED2
+    typename: rarible_bids
 
 indexes:
   rarible_exchange_actions:
@@ -29,13 +32,25 @@ indexes:
         pattern:
           - destination: rarible_exchange_ithacanet
             entrypoint: buy
-    rarible_bid_actions:
-      kind: operation
-      datasource: tzkt_ithacanet
-      contracts:
-        - rarible_bids_ithacanet
-      handlers:
-        - callback: rarible_put_bid
-          pattern:
-            - destination: rarible_bids_ithacanet
-              entrypoint: put_bid
+  rarible_bids_actions:
+    kind: operation
+    datasource: tzkt_ithacanet
+    contracts:
+      - rarible_bids_ithacanet
+    handlers:
+      - callback: rarible_put_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: put_bid
+      - callback: rarible_put_floor_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: put_floor_bid
+      - callback: rarible_accept_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: accept_bid
+      - callback: rarible_accept_floor_bid
+        pattern:
+          - destination: rarible_bids_ithacanet
+            entrypoint: accept_floor_bid

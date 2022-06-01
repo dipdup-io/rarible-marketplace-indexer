@@ -47,3 +47,37 @@ class PutBidParameter(BaseModel):
     pb_bid_type: str
     pb_bid_asset: str
     pb_bid: PBBid
+
+class PutFloorBidParameter(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+    pfb_asset_contract: str
+    pfb_bid_type: str
+    pfb_bid_asset: str
+    pfb_bid: PBBid
+
+
+class AcceptBidParameter(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+    ab_asset_contract: str
+    ab_asset_token_id: str
+    ab_bidder: str
+    ab_bid_type: str
+    ab_bid_asset: str
+    ab_origin_fees: List[BidOriginFee]
+    ab_payouts: List[BidPayout]
+
+class AcceptFloorBidParameter(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+    afb_asset_contract: str
+    afb_asset_token_id: str
+    afb_bidder: str
+    afb_bid_type: str
+    afb_bid_asset: str
+    afb_origin_fees: List[BidOriginFee]
+    afb_payouts: List[BidPayout]

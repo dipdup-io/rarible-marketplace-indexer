@@ -21,6 +21,10 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Op
 
 _StrEnumValue = TypeVar("_StrEnumValue")
 
+class TransactionTypeEnum(str, Enum):
+    SALE: _StrEnumValue = 'SALE'
+    BID: _StrEnumValue = 'BID'
+    FLOOR_BID: _StrEnumValue = 'FLOOR_BID'
 
 class OrderStatusEnum(str, Enum):
     ACTIVE: _StrEnumValue = 'ACTIVE'
@@ -31,9 +35,13 @@ class OrderStatusEnum(str, Enum):
 
 
 class ActivityTypeEnum(str, Enum):
+    ACCEPT_BID: _StrEnumValue = 'ACCEPT_BID'
+    ACCEPT_FLOOR_BID: _StrEnumValue = 'ACCEPT_FLOOR_BID'
     ORDER_LIST: _StrEnumValue = 'LIST'
     ORDER_MATCH: _StrEnumValue = 'SELL'
     ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    PUT_BID: _StrEnumValue = 'PUT_BID'
+    PUT_FLOOR_BID: _StrEnumValue = 'PUT_FLOOR_BID'
     TOKEN_MINT: _StrEnumValue = 'MINT'
     TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
     TOKEN_BURN: _StrEnumValue = 'BURN'
@@ -58,7 +66,7 @@ class ActivityModel(Model):
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
     internal_order_id = fields.CharField(max_length=32, index=True)
-    maker = AccountAddressField()
+    maker = AccountAddressField(null=True)
     taker = AccountAddressField(null=True)
     sell_price = XtzField()
     make_asset_class = fields.CharEnumField(AssetClassEnum)
@@ -143,12 +151,14 @@ class OrderModel(Model):
         super().__init__(**kwargs)
 
     @staticmethod
-    def get_id(network, platform, internal_order_id, *args, **kwargs):
+    def get_id(network, platform, internal_order_id, maker, created_at, *args, **kwargs):
         assert network
         assert platform
         assert internal_order_id
+        assert maker
+        assert created_at
 
-        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, maker, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 class BidModel(Model):
@@ -158,20 +168,23 @@ class BidModel(Model):
     _custom_generated_pk = True
 
     id = fields.UUIDField(pk=True, generated=False, required=True)
-    internal_bid_id = fields.CharField(max_length=32, index=True)
+    internal_order_id = fields.CharField(max_length=32, index=True)
     network = fields.CharField(max_length=16, index=True)
     platform = fields.CharEnumField(PlatformEnum, index=True)
     created_at = fields.DatetimeField(index=True)
+    ended_at = fields.DatetimeField(null=True)
     last_updated_at = fields.DatetimeField(index=True)
     make_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
     make_contract = AccountAddressField(null=True)
     make_token_id = fields.TextField(null=True)
     make_value = AssetValueField()
-    taker = AccountAddressField(null=True)
+    bidder = AccountAddressField(null=True)
+    seller = AccountAddressField(null=True)
     take_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
     take_contract = AccountAddressField(null=True)
     take_token_id = fields.TextField(null=True)
     take_value = AssetValueField(null=True)
+    status = fields.CharEnumField(OrderStatusEnum, index=True)
 
     def __init__(self, **kwargs: Any) -> None:
         try:
@@ -181,12 +194,14 @@ class BidModel(Model):
         super().__init__(**kwargs)
 
     @staticmethod
-    def get_id(network, platform, internal_order_id, *args, **kwargs):
+    def get_id(network, platform, internal_order_id, bidder, created_at, *args, **kwargs):
         assert network
         assert platform
         assert internal_order_id
+        assert bidder
+        assert created_at
 
-        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, bidder, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 @post_save(OrderModel)
@@ -201,6 +216,17 @@ async def signal_order_post_save(
 
     await producer_send(RaribleApiOrderFactory.build(instance))
 
+@post_save(BidModel)
+async def signal_bid_post_save(
+    sender: BidModel,
+    instance: BidModel,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
+) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.bid.factory import RaribleApiBidFactory
+
+    await producer_send(RaribleApiBidFactory.build(instance))
 
 @post_save(ActivityModel)
 async def signal_activity_post_save(

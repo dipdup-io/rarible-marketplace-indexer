@@ -51,7 +51,23 @@ class MatchDto:
 
 @dataclass
 class BidDto:
-    internal_bid_id: str
+    internal_order_id: str
     take_price: BaseValue
+    bidder: str
     make: MakeDto
     take: TakeDto
+
+@dataclass
+class AcceptBidDto:
+    internal_order_id: str
+    bidder: str
+    seller: str
+    match_timestamp: datetime
+
+@dataclass
+class AcceptFloorBidDto:
+    internal_order_id: str
+    token_id: int
+    bidder: str
+    seller: str
+    match_timestamp: datetime

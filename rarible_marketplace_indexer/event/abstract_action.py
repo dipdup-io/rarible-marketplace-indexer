@@ -4,7 +4,7 @@ from typing import final
 
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
-
+from rarible_marketplace_indexer.event.dto import BidDto, AcceptBidDto, AcceptFloorBidDto
 from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
@@ -203,10 +203,10 @@ class AbstractOrderMatchEvent(EventInterface):
 class AbstractPutBidEvent(EventInterface):
     @staticmethod
     @abstractmethod
-    def _get_list_dto(
+    def _get_bid_dto(
         transaction: Transaction,
         datasource: TzktDatasource,
-    ) -> ListDto:
+    ) -> BidDto:
         raise NotImplementedError
 
     @classmethod
@@ -216,32 +216,45 @@ class AbstractPutBidEvent(EventInterface):
         transaction: Transaction,
         datasource: TzktDatasource,
     ):
-        dto = cls._get_list_dto(transaction, datasource)
-        if not dto.started_at:
-            dto.started_at = transaction.data.timestamp
+        dto = cls._get_bid_dto(transaction, datasource)
 
-        order = await BidModel.create(
+        bid = await BidModel.get_or_none(
+            internal_order_id=dto.internal_order_id,
             network=datasource.network,
             platform=cls.platform,
-            created_at=transaction.data.timestamp,
-            last_updated_at=transaction.data.timestamp,
-            make_asset_class=dto.make.asset_class,
-            make_contract=dto.make.contract,
-            make_token_id=dto.make.token_id,
-            make_value=dto.make.value,
-            take_asset_class=dto.take.asset_class,
-            take_contract=dto.take.contract,
-            take_token_id=dto.take.token_id,
-            take_value=dto.take.value,
+            status=OrderStatusEnum.ACTIVE
         )
+        if bid is None:
+            bid = await BidModel.create(
+                internal_order_id=dto.internal_order_id,
+                network=datasource.network,
+                platform=cls.platform,
+                status=OrderStatusEnum.ACTIVE,
+                created_at=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                make_asset_class=dto.make.asset_class,
+                make_contract=dto.make.contract,
+                make_token_id=dto.make.token_id,
+                make_value=dto.make.value,
+                take_asset_class=dto.take.asset_class,
+                take_contract=dto.take.contract,
+                take_token_id=dto.take.token_id,
+                take_value=dto.take.value,
+                bidder=dto.bidder
+            )
+        else:
+            bid.last_updated_at = transaction.data.timestamp
+            bid.make_value = dto.make.value
+            bid.take_value = dto.take_price
+            bid.save()
 
         await ActivityModel.create(
-            type=ActivityTypeEnum.ORDER_LIST,
+            type=ActivityTypeEnum.PUT_BID,
             network=datasource.network,
             platform=cls.platform,
-            order_id=order.id,
+            order_id=bid.id,
             internal_order_id=dto.internal_order_id,
-            maker=dto.maker,
+            taker=dto.bidder,
             make_asset_class=dto.make.asset_class,
             make_contract=dto.make.contract,
             make_token_id=dto.make.token_id,
@@ -250,10 +263,185 @@ class AbstractPutBidEvent(EventInterface):
             take_contract=dto.take.contract,
             take_token_id=dto.take.token_id,
             take_value=dto.take.value,
-            sell_price=dto.make_price,
+            sell_price=dto.take_price,
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,
             operation_counter=transaction.data.counter,
             operation_nonce=transaction.data.nonce,
         )
+
+class AbstractPutFloorBidEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_floor_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> BidDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_floor_bid_dto(transaction, datasource)
+
+        bid = await BidModel.get_or_none(
+            internal_order_id=dto.internal_order_id,
+            network=datasource.network,
+            platform=cls.platform,
+            status=OrderStatusEnum.ACTIVE
+        )
+
+        if bid is None:
+            bid = await BidModel.create(
+                internal_order_id=dto.internal_order_id,
+                network=datasource.network,
+                status=OrderStatusEnum.ACTIVE,
+                platform=cls.platform,
+                created_at=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                make_asset_class=dto.make.asset_class,
+                make_contract=dto.make.contract,
+                make_token_id=None,
+                make_value=dto.make.value,
+                take_asset_class=dto.take.asset_class,
+                take_contract=dto.take.contract,
+                take_token_id=dto.take.token_id,
+                take_value=dto.take.value,
+                bidder=dto.bidder
+            )
+        else:
+            bid.last_updated_at = transaction.data.timestamp
+            bid.make_value = dto.make.value
+            bid.take_value = dto.take_price
+            bid.save()
+
+        await ActivityModel.create(
+            type=ActivityTypeEnum.PUT_FLOOR_BID,
+            network=datasource.network,
+            platform=cls.platform,
+            order_id=bid.id,
+            internal_order_id=dto.internal_order_id,
+            taker=dto.bidder,
+            make_asset_class=dto.make.asset_class,
+            make_contract=dto.make.contract,
+            make_token_id=None,
+            make_value=dto.make.value,
+            take_asset_class=dto.take.asset_class,
+            take_contract=dto.take.contract,
+            take_token_id=dto.take.token_id,
+            take_value=dto.take.value,
+            sell_price=dto.take_price,
+            operation_level=transaction.data.level,
+            operation_timestamp=transaction.data.timestamp,
+            operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
+        )
+
+
+class AbstractAcceptBidEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_accept_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> AcceptBidDto:
+        raise NotImplementedError
+
+    @staticmethod
+    @final
+    def _process_bid_match(bid: BidModel, dto: AcceptBidDto) -> BidModel:
+        bid.status = OrderStatusEnum.FILLED
+        bid.ended_at = dto.match_timestamp
+        return bid
+
+    @classmethod
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_accept_bid_dto(transaction, datasource)
+
+        last_put_bid_activity = (
+            await ActivityModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+            )
+            .order_by('-operation_level')
+            .first()
+        )
+        accept_bid_activity = last_put_bid_activity.apply(transaction)
+
+        accept_bid_activity.type = ActivityTypeEnum.ACCEPT_BID
+        accept_bid_activity.maker = transaction.data.sender_address
+
+        await accept_bid_activity.save()
+
+        bid = await BidModel.get(
+            network=datasource.network,
+            platform=cls.platform,
+            internal_order_id=dto.internal_order_id,
+            status=OrderStatusEnum.ACTIVE,
+        )
+        bid.last_updated_at = transaction.data.timestamp
+        bid = cls._process_bid_match(bid, dto)
+
+        await bid.save()
+
+class AbstractAcceptFloorBidEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_accept_floor_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> AcceptFloorBidDto:
+        raise NotImplementedError
+
+    @staticmethod
+    @final
+    def _process_floor_bid_match(bid: BidModel, dto: AcceptFloorBidDto) -> BidModel:
+        bid.status = OrderStatusEnum.FILLED
+        bid.ended_at = dto.match_timestamp
+        return bid
+
+    @classmethod
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_accept_floor_bid_dto(transaction, datasource)
+
+        last_put_bid_activity = (
+            await ActivityModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+            )
+            .order_by('-operation_level')
+            .first()
+        )
+        accept_bid_activity = last_put_bid_activity.apply(transaction)
+
+        accept_bid_activity.type = ActivityTypeEnum.ACCEPT_BID
+        accept_bid_activity.taker = transaction.data.sender_address
+
+        await accept_bid_activity.save()
+
+        bid = await BidModel.get(
+            network=datasource.network,
+            platform=cls.platform,
+            internal_order_id=dto.internal_order_id,
+            status=OrderStatusEnum.ACTIVE,
+        )
+        bid.last_updated_at = transaction.data.timestamp
+        bid = cls._process_floor_bid_match(bid, dto)
+
+        await bid.save()
