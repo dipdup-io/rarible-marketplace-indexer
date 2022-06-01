@@ -1,9 +1,9 @@
 custom:
   enabled: ${KAFKA_ENABLED:-true}
-  kafka_address: kafka0:9094
+  kafka_address: ${KAFKA_URL:-}
   client_id: dipdup-rarible-mainnet-producer
   kafka_security_protocol: ${KAFKA_SECURITY_PROTOCOL:-SASL_PLAINTEXT}
   sasl:
     mechanism: ${KAFKA_SASL_MECHANISM:-PLAIN}
-    username: rarible
-    password: changeme
+    username: ${KAFKA_USERNAME}
+    password: ${KAFKA_PASSWORD}

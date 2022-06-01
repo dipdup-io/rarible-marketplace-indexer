@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
       - kafka0
-    command: [ "-c", "dipdup.yml", "-c", "dipdup.ithacanet.yml", "-c", "dipdup.prod.yml", "run" ]
+    command: [ "-c", "dipdup.yml", "-c", "dipdup.${RARIBLE_ENV:-mainnet}.yml", "-c", "dipdup.prod.yml", "run" ]
     restart: "no"
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
