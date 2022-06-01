@@ -398,6 +398,7 @@ class AbstractAcceptBidEvent(EventInterface):
             status=OrderStatusEnum.ACTIVE,
         )
         order.last_updated_at = transaction.data.timestamp
+        order.taker = transaction.data.sender_address
         order = cls._process_bid_match(order, dto)
 
         await order.save()
@@ -451,6 +452,7 @@ class AbstractAcceptFloorBidEvent(EventInterface):
             status=OrderStatusEnum.ACTIVE,
         )
         order.last_updated_at = transaction.data.timestamp
+        order.taker = transaction.data.sender_address
         order = cls._process_floor_bid_match(order, dto)
 
         await order.save()
@@ -473,36 +475,37 @@ class AbstractBidCancelEvent(EventInterface):
         datasource: TzktDatasource,
     ):
         dto = cls._get_cancel_bid_dto(transaction, datasource)
-        last_bid_activity = (
+        last_order_activity = (
             await ActivityModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
             )
-            .order_by('-operation_level')
-            .first()
+                .order_by('-operation_level')
+                .first()
         )
-        cancel_activity = last_bid_activity.apply(transaction)
+        cancel_activity = last_order_activity.apply(transaction)
 
         cancel_activity.type = ActivityTypeEnum.CANCEL_BID
         await cancel_activity.save()
 
-        bid = (
+        order = (
             await OrderModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
             )
-            .order_by('-id')
-            .first()
+                .order_by('-id')
+                .first()
         )
 
-        bid.status = OrderStatusEnum.CANCELLED
-        bid.ended_at = transaction.data.timestamp
-        bid.last_updated_at = transaction.data.timestamp
+        order.status = OrderStatusEnum.CANCELLED
+        order.cancelled = True
+        order.ended_at = transaction.data.timestamp
+        order.last_updated_at = transaction.data.timestamp
 
-        await bid.save()
+        await order.save()
 
 
 class AbstractFloorBidCancelEvent(EventInterface):
@@ -522,33 +525,34 @@ class AbstractFloorBidCancelEvent(EventInterface):
         datasource: TzktDatasource,
     ):
         dto = cls._get_cancel_floor_bid_dto(transaction, datasource)
-        last_bid_activity = (
+        last_order_activity = (
             await ActivityModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
             )
-            .order_by('-operation_level')
-            .first()
+                .order_by('-operation_level')
+                .first()
         )
-        cancel_activity = last_bid_activity.apply(transaction)
+        cancel_activity = last_order_activity.apply(transaction)
 
-        cancel_activity.type = ActivityTypeEnum.CANCEL_FLOOR_BID
+        cancel_activity.type = ActivityTypeEnum.ORDER_CANCEL
         await cancel_activity.save()
 
-        bid = (
+        order = (
             await OrderModel.filter(
                 network=datasource.network,
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
             )
-            .order_by('-id')
-            .first()
+                .order_by('-id')
+                .first()
         )
 
-        bid.status = OrderStatusEnum.CANCELLED
-        bid.ended_at = transaction.data.timestamp
-        bid.last_updated_at = transaction.data.timestamp
+        order.status = OrderStatusEnum.CANCELLED
+        order.cancelled = True
+        order.ended_at = transaction.data.timestamp
+        order.last_updated_at = transaction.data.timestamp
 
-        await bid.save()
+        await order.save()
