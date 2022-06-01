@@ -57,12 +57,14 @@ class BidDto:
     make: MakeDto
     take: TakeDto
 
+
 @dataclass
 class AcceptBidDto:
     internal_order_id: str
     bidder: str
     seller: str
     match_timestamp: datetime
+
 
 @dataclass
 class AcceptFloorBidDto:

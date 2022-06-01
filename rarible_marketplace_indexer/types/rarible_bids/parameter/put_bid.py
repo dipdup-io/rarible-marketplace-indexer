@@ -48,6 +48,7 @@ class PutBidParameter(BaseModel):
     pb_bid_asset: str
     pb_bid: PBBid
 
+
 class PutFloorBidParameter(BaseModel):
     class Config:
         extra = Extra.forbid
@@ -69,6 +70,7 @@ class AcceptBidParameter(BaseModel):
     ab_bid_asset: str
     ab_origin_fees: List[BidOriginFee]
     ab_payouts: List[BidPayout]
+
 
 class AcceptFloorBidParameter(BaseModel):
     class Config:

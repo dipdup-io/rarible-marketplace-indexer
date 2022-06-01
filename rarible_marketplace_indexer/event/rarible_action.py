@@ -7,21 +7,31 @@ from base58 import b58encode_check
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCancelEvent, AbstractPutBidEvent, \
-    AbstractAcceptBidEvent, AbstractAcceptFloorBidEvent, AbstractFloorBidCancelEvent, AbstractBidCancelEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptFloorBidEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractBidCancelEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractFloorBidCancelEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCancelEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderListEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatchEvent
-from rarible_marketplace_indexer.event.dto import CancelDto, BidDto, AcceptBidDto, AcceptFloorBidDto
+from rarible_marketplace_indexer.event.abstract_action import AbstractPutBidEvent
+from rarible_marketplace_indexer.event.dto import AcceptBidDto
+from rarible_marketplace_indexer.event.dto import AcceptFloorBidDto
+from rarible_marketplace_indexer.event.dto import BidDto
+from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MakeDto
 from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.event.dto import TakeDto
-from rarible_marketplace_indexer.models import PlatformEnum, TransactionTypeEnum
+from rarible_marketplace_indexer.models import PlatformEnum
+from rarible_marketplace_indexer.models import TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter, PutFloorBidParameter, \
-    AcceptBidParameter, AcceptFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import AcceptBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import AcceptFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.buy import BuyParameter
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.cancel_sale import CancelSaleParameter
@@ -89,17 +99,26 @@ class RaribleAware:
         )
 
     @staticmethod
-    def get_order_hash(contract: OriginatedAccountAddress, token_id: int, seller: ImplicitAccountAddress, asset_class: str = None, asset: str = None) -> str:
-        return uuid5(namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.SALE}-{contract}:{token_id}@{seller}/{asset_class}-{asset}').hex
+    def get_order_hash(
+        contract: OriginatedAccountAddress, token_id: int, seller: ImplicitAccountAddress, asset_class: str = None, asset: str = None
+    ) -> str:
+        return uuid5(
+            namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.SALE}-{contract}:{token_id}@{seller}/{asset_class}-{asset}'
+        ).hex
 
     @staticmethod
-    def get_bid_hash(contract: OriginatedAccountAddress, token_id: int, bidder: ImplicitAccountAddress, asset_class: str = None, asset: str = None) -> str:
-        return uuid5(namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.BID}-{contract}:{token_id}@{bidder}/{asset_class}-{asset}').hex
+    def get_bid_hash(
+        contract: OriginatedAccountAddress, token_id: int, bidder: ImplicitAccountAddress, asset_class: str = None, asset: str = None
+    ) -> str:
+        return uuid5(
+            namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.BID}-{contract}:{token_id}@{bidder}/{asset_class}-{asset}'
+        ).hex
 
     @staticmethod
-    def get_floor_bid_hash(contract: OriginatedAccountAddress, bidder: ImplicitAccountAddress, asset_class: str = None, asset: str = None) -> str:
+    def get_floor_bid_hash(
+        contract: OriginatedAccountAddress, bidder: ImplicitAccountAddress, asset_class: str = None, asset: str = None
+    ) -> str:
         return uuid5(namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.FLOOR_BID}-{contract}@{bidder}/{asset_class}-{asset}').hex
-
 
     @classmethod
     def get_take_dto(cls, sale_type: int, value: int, asset_bytes: Optional[bytes] = None) -> TakeDto:
@@ -123,7 +142,7 @@ class RaribleOrderListEvent(AbstractOrderListEvent):
             token_id=int(transaction.parameter.s_asset_token_id),
             seller=ImplicitAccountAddress(transaction.data.sender_address),
             asset_class=transaction.parameter.s_sale_type,
-            asset=transaction.parameter.s_sale_asset
+            asset=transaction.parameter.s_sale_asset,
         )
 
         take = RaribleAware.get_take_dto(
@@ -159,7 +178,7 @@ class RaribleOrderCancelEvent(AbstractOrderCancelEvent):
             token_id=int(transaction.parameter.cs_asset_token_id),
             seller=ImplicitAccountAddress(transaction.data.sender_address),
             asset_class=transaction.parameter.cs_sale_type,
-            asset=transaction.parameter.cs_sale_asset
+            asset=transaction.parameter.cs_sale_asset,
         )
 
         return CancelDto(internal_order_id=internal_order_id)
@@ -176,7 +195,7 @@ class RaribleOrderMatchEvent(AbstractOrderMatchEvent):
             token_id=int(transaction.parameter.b_asset_token_id),
             seller=ImplicitAccountAddress(transaction.parameter.b_seller),
             asset_class=transaction.parameter.b_sale_type,
-            asset=transaction.parameter.b_sale_asset
+            asset=transaction.parameter.b_sale_asset,
         )
 
         return MatchDto(
@@ -184,6 +203,7 @@ class RaribleOrderMatchEvent(AbstractOrderMatchEvent):
             match_amount=AssetValue(transaction.parameter.b_amount),
             match_timestamp=transaction.data.timestamp,
         )
+
 
 class RariblePutBidEvent(AbstractPutBidEvent):
     platform = PlatformEnum.RARIBLE
@@ -223,6 +243,7 @@ class RariblePutBidEvent(AbstractPutBidEvent):
             take=take,
         )
 
+
 class RariblePutFloorBidEvent(AbstractPutBidEvent):
     platform = PlatformEnum.RARIBLE
     RariblePutFloorBidTransaction = Transaction[PutFloorBidParameter, RaribleBidsStorage]
@@ -236,7 +257,7 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
             contract=OriginatedAccountAddress(transaction.parameter.pfb_asset_contract),
             bidder=ImplicitAccountAddress(transaction.data.sender_address),
             asset_class=transaction.parameter.pfb_bid_type,
-            asset=transaction.parameter.pfb_bid_asset
+            asset=transaction.parameter.pfb_bid_asset,
         )
 
         take = RaribleAware.get_take_dto(
@@ -272,7 +293,7 @@ class RaribleAcceptBidEvent(AbstractAcceptBidEvent):
             token_id=int(transaction.parameter.ab_asset_token_id),
             bidder=ImplicitAccountAddress(transaction.parameter.ab_bidder),
             asset_class=transaction.parameter.ab_bid_type,
-            asset=transaction.parameter.ab_bid_asset
+            asset=transaction.parameter.ab_bid_asset,
         )
 
         return AcceptBidDto(
@@ -293,7 +314,7 @@ class RaribleAcceptFloorBidEvent(AbstractAcceptFloorBidEvent):
             contract=OriginatedAccountAddress(transaction.parameter.afb_asset_contract),
             bidder=ImplicitAccountAddress(transaction.parameter.afb_bidder),
             asset_class=transaction.parameter.afb_bid_type,
-            asset=transaction.parameter.afb_bid_asset
+            asset=transaction.parameter.afb_bid_asset,
         )
 
         return AcceptFloorBidDto(
@@ -303,6 +324,7 @@ class RaribleAcceptFloorBidEvent(AbstractAcceptFloorBidEvent):
             seller=ImplicitAccountAddress(transaction.data.sender_address),
             match_timestamp=transaction.data.timestamp,
         )
+
 
 class RaribleBidCancelEvent(AbstractBidCancelEvent):
     platform = PlatformEnum.RARIBLE
@@ -315,7 +337,7 @@ class RaribleBidCancelEvent(AbstractBidCancelEvent):
             token_id=int(transaction.parameter.cb_asset_token_id),
             bidder=ImplicitAccountAddress(transaction.data.sender_address),
             asset_class=transaction.parameter.cb_bid_type,
-            asset=transaction.parameter.cb_bid_asset
+            asset=transaction.parameter.cb_bid_asset,
         )
 
         return CancelDto(internal_order_id=internal_order_id)
@@ -331,7 +353,7 @@ class RaribleFloorBidCancelEvent(AbstractFloorBidCancelEvent):
             contract=OriginatedAccountAddress(transaction.parameter.cfb_asset_contract),
             bidder=ImplicitAccountAddress(transaction.data.sender_address),
             asset_class=transaction.parameter.cfb_bid_type,
-            asset=transaction.parameter.cfb_bid_asset
+            asset=transaction.parameter.cfb_bid_asset,
         )
 
         return CancelDto(internal_order_id=internal_order_id)

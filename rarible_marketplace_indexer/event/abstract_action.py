@@ -4,12 +4,16 @@ from typing import final
 
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
-from rarible_marketplace_indexer.event.dto import BidDto, AcceptBidDto, AcceptFloorBidDto
+
+from rarible_marketplace_indexer.event.dto import AcceptBidDto
+from rarible_marketplace_indexer.event.dto import AcceptFloorBidDto
+from rarible_marketplace_indexer.event.dto import BidDto
 from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
-from rarible_marketplace_indexer.models import ActivityModel, BidModel
+from rarible_marketplace_indexer.models import ActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
+from rarible_marketplace_indexer.models import BidModel
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
@@ -200,6 +204,7 @@ class AbstractOrderMatchEvent(EventInterface):
 
         await order.save()
 
+
 class AbstractPutBidEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -219,10 +224,7 @@ class AbstractPutBidEvent(EventInterface):
         dto = cls._get_bid_dto(transaction, datasource)
 
         bid = await BidModel.get_or_none(
-            internal_order_id=dto.internal_order_id,
-            network=datasource.network,
-            platform=cls.platform,
-            status=OrderStatusEnum.ACTIVE
+            internal_order_id=dto.internal_order_id, network=datasource.network, platform=cls.platform, status=OrderStatusEnum.ACTIVE
         )
         if bid is None:
             bid = await BidModel.create(
@@ -240,7 +242,7 @@ class AbstractPutBidEvent(EventInterface):
                 take_contract=dto.take.contract,
                 take_token_id=dto.take.token_id,
                 take_value=dto.take.value,
-                bidder=dto.bidder
+                bidder=dto.bidder,
             )
         else:
             bid.last_updated_at = transaction.data.timestamp
@@ -271,6 +273,7 @@ class AbstractPutBidEvent(EventInterface):
             operation_nonce=transaction.data.nonce,
         )
 
+
 class AbstractPutFloorBidEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -290,10 +293,7 @@ class AbstractPutFloorBidEvent(EventInterface):
         dto = cls._get_floor_bid_dto(transaction, datasource)
 
         bid = await BidModel.get_or_none(
-            internal_order_id=dto.internal_order_id,
-            network=datasource.network,
-            platform=cls.platform,
-            status=OrderStatusEnum.ACTIVE
+            internal_order_id=dto.internal_order_id, network=datasource.network, platform=cls.platform, status=OrderStatusEnum.ACTIVE
         )
 
         if bid is None:
@@ -312,7 +312,7 @@ class AbstractPutFloorBidEvent(EventInterface):
                 take_contract=dto.take.contract,
                 take_token_id=dto.take.token_id,
                 take_value=dto.take.value,
-                bidder=dto.bidder
+                bidder=dto.bidder,
             )
         else:
             bid.last_updated_at = transaction.data.timestamp
@@ -395,6 +395,7 @@ class AbstractAcceptBidEvent(EventInterface):
 
         await bid.save()
 
+
 class AbstractAcceptFloorBidEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -446,6 +447,7 @@ class AbstractAcceptFloorBidEvent(EventInterface):
 
         await bid.save()
 
+
 class AbstractBidCancelEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -493,6 +495,7 @@ class AbstractBidCancelEvent(EventInterface):
         bid.last_updated_at = transaction.data.timestamp
 
         await bid.save()
+
 
 class AbstractFloorBidCancelEvent(EventInterface):
     @staticmethod

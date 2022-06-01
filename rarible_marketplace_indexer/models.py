@@ -21,10 +21,12 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Op
 
 _StrEnumValue = TypeVar("_StrEnumValue")
 
+
 class TransactionTypeEnum(str, Enum):
     SALE: _StrEnumValue = 'SALE'
     BID: _StrEnumValue = 'BID'
     FLOOR_BID: _StrEnumValue = 'FLOOR_BID'
+
 
 class OrderStatusEnum(str, Enum):
     ACTIVE: _StrEnumValue = 'ACTIVE'
@@ -163,6 +165,7 @@ class OrderModel(Model):
         oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, maker, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
+
 class BidModel(Model):
     class Meta:
         table = 'marketplace_bid'
@@ -206,6 +209,7 @@ class BidModel(Model):
         oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, bidder, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
+
 @post_save(OrderModel)
 async def signal_order_post_save(
     sender: OrderModel,
@@ -218,6 +222,7 @@ async def signal_order_post_save(
 
     await producer_send(RaribleApiOrderFactory.build(instance))
 
+
 @post_save(BidModel)
 async def signal_bid_post_save(
     sender: BidModel,
@@ -229,6 +234,7 @@ async def signal_bid_post_save(
     from rarible_marketplace_indexer.types.rarible_api_objects.bid.factory import RaribleApiBidFactory
 
     await producer_send(RaribleApiBidFactory.build(instance))
+
 
 @post_save(ActivityModel)
 async def signal_activity_post_save(

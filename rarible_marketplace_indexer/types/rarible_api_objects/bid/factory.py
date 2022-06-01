@@ -17,5 +17,5 @@ class RaribleApiBidFactory:
             maker=bid.seller,
             taker=bid.bidder,
             make=Asset.make_from_model(bid),
-            take=Asset.take_from_model(bid)
+            take=Asset.take_from_model(bid),
         )
