@@ -36,11 +36,13 @@ class OrderStatusEnum(str, Enum):
     INACTIVE: _StrEnumValue = 'INACTIVE'
     CANCELLED: _StrEnumValue = 'CANCELLED'
 
+
 class AuctionStatusEnum(str, Enum):
     ACTIVE: _StrEnumValue = 'ACTIVE'
     FINISHED: _StrEnumValue = 'FINISHED'
     INACTIVE: _StrEnumValue = 'INACTIVE'
     CANCELLED: _StrEnumValue = 'CANCELLED'
+
 
 class ActivityTypeEnum(str, Enum):
     GET_BID: _StrEnumValue = 'GET_BID'
@@ -230,6 +232,7 @@ class AuctionModel(Model):
         oid = '.'.join(map(str, filter(bool, [network, platform, auction_id, seller, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
+
 class AuctionActivityModel(Model):
     class Meta:
         table = 'marketplace_auction_activity'
@@ -278,6 +281,7 @@ class AuctionActivityModel(Model):
         activity.operation_nonce = transaction.data.nonce
 
         return activity
+
 
 @post_save(OrderModel)
 async def signal_order_post_save(

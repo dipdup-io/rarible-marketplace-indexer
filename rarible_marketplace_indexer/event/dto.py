@@ -15,6 +15,7 @@ class AssetDto:
     contract: Optional[OriginatedAccountAddress]
     token_id: Optional[int]
 
+
 @dataclass
 class MakeDto:
     asset_class: AssetClassEnum
@@ -71,3 +72,9 @@ class StartAuctionDto:
     min_step: int
     max_seller_fees: int
 
+
+@dataclass
+class PutAuctionBidDto:
+    auction_id: str
+    bidder: ImplicitAccountAddress
+    bid_value: Optional[AssetValue]

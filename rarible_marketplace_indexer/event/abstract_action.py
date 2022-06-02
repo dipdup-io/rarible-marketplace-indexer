@@ -6,11 +6,16 @@ from typing import final
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.event.dto import CancelDto, StartAuctionDto
+from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
-from rarible_marketplace_indexer.models import ActivityModel, AuctionModel, AuctionStatusEnum, AuctionActivityModel
+from rarible_marketplace_indexer.event.dto import PutAuctionBidDto
+from rarible_marketplace_indexer.event.dto import StartAuctionDto
+from rarible_marketplace_indexer.models import ActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
+from rarible_marketplace_indexer.models import AuctionActivityModel
+from rarible_marketplace_indexer.models import AuctionModel
+from rarible_marketplace_indexer.models import AuctionStatusEnum
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
@@ -559,6 +564,7 @@ class AbstractFloorBidCancelEvent(EventInterface):
 
         await order.save()
 
+
 class AbstractStartAuctionEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -590,7 +596,7 @@ class AbstractStartAuctionEvent(EventInterface):
             start_at=dto.start_at,
             ended_at=None,
             created_at=transaction.data.timestamp,
-            end_time=dto.start_at+timedelta(seconds=dto.duration),
+            end_time=dto.start_at + timedelta(seconds=dto.duration),
             last_updated_at=transaction.data.timestamp,
             ongoing=ongoing,
             seller=transaction.data.sender_address,
@@ -608,7 +614,7 @@ class AbstractStartAuctionEvent(EventInterface):
             max_seller_fees=dto.max_seller_fees,
             last_bid_amount=None,
             last_bid_bidder=None,
-            last_bid_date=None
+            last_bid_date=None,
         )
 
         await AuctionActivityModel.create(
@@ -645,3 +651,58 @@ class AbstractStartAuctionEvent(EventInterface):
                 operation_counter=transaction.data.counter,
                 operation_nonce=transaction.data.nonce,
             )
+
+
+class AbstractPutAuctionBidEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_put_auction_bid_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> PutAuctionBidDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_put_auction_bid_dto(transaction, datasource)
+
+        auction = (
+            await AuctionModel.filter(
+                network=datasource.network,
+                platform=cls.platform,
+                auction_id=dto.auction_id,
+            )
+            .order_by('-id')
+            .first()
+        )
+
+        auction.last_updated_at = transaction.data.timestamp
+        auction.last_bid_date = transaction.data.timestamp
+        auction.last_bid_amount = dto.bid_value
+        auction.last_bid_bidder = dto.bidder
+        auction.status = AuctionStatusEnum.ACTIVE
+        auction.save()
+
+        # TODO: handle buyouts
+
+        await AuctionActivityModel.create(
+            auction_id=auction.id,
+            type=ActivityTypeEnum.AUCTION_BID,
+            network=datasource.network,
+            platform=cls.platform,
+            internal_auction_id=dto.auction_id,
+            bid_value=dto.bid_value,
+            bid_bidder=dto.bidder,
+            date=transaction.data.timestamp,
+            last_updated_at=transaction.data.timestamp,
+            operation_level=transaction.data.level,
+            operation_timestamp=transaction.data.timestamp,
+            operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
+        )
