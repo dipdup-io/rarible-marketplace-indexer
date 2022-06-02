@@ -7,7 +7,7 @@ from base58 import b58encode_check
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent, AbstractStartAuctionEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptFloorBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractBidCancelEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractFloorBidCancelEvent
@@ -15,7 +15,7 @@ from rarible_marketplace_indexer.event.abstract_action import AbstractOrderCance
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderListEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatchEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractPutBidEvent
-from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import CancelDto, StartAuctionDto, AssetDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MakeDto
 from rarible_marketplace_indexer.event.dto import MatchDto
@@ -23,6 +23,8 @@ from rarible_marketplace_indexer.event.dto import TakeDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.models import TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
+from rarible_marketplace_indexer.types.rarible_auctions.parameter.start_auction import StartAuctionParameter
+from rarible_marketplace_indexer.types.rarible_auctions.storage import RaribleAuctionsStorage
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import AcceptBidParameter
@@ -147,6 +149,14 @@ class RaribleAware:
     ) -> str:
         return uuid5(namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.FLOOR_BID}-{contract}@{bidder}/{asset_class}-{asset}').hex
 
+    @staticmethod
+    def get_auction_hash(
+        contract: OriginatedAccountAddress, token_id: int, seller: ImplicitAccountAddress
+    ) -> str:
+        return uuid5(
+            namespace=uuid.NAMESPACE_OID, name=f'{TransactionTypeEnum.AUCTION}-{contract}:{token_id}@{seller}'
+        ).hex
+
     @classmethod
     def get_take_dto(cls, sale_type: int, value: int, asset_bytes: Optional[bytes] = None) -> TakeDto:
         method_name = cls.unpack_map_take.get(sale_type)
@@ -160,6 +170,18 @@ class RaribleAware:
         make_method = getattr(cls, method_name)
 
         return make_method(value, asset_bytes)
+
+    @classmethod
+    def get_asset(cls, sale_type: int, asset_bytes: Optional[bytes]) -> AssetDto:
+        match sale_type:
+            case "0":
+                return AssetDto(contract=None, token_id=None);
+            case "1":
+                return AssetDto(contract=cls._get_contract(asset_bytes, 7), token_id=None);
+            case "2":
+                return AssetDto(contract=cls._get_contract(asset_bytes, 9), token_id=cls._get_token_id(asset_bytes));
+            case _:
+                raise Exception(f"Could not parse asset {asset_bytes} for type {sale_type}");
 
 
 class RaribleOrderListEvent(AbstractOrderListEvent):
@@ -396,3 +418,37 @@ class RaribleFloorBidCancelEvent(AbstractFloorBidCancelEvent):
         )
 
         return CancelDto(internal_order_id=internal_order_id)
+
+class RaribleStartAuctionEvent(AbstractStartAuctionEvent):
+    platform = PlatformEnum.RARIBLE
+    RaribleCreateAuctionTransaction = Transaction[StartAuctionParameter, RaribleAuctionsStorage]
+
+    @staticmethod
+    def _get_start_auction_dto(
+        transaction: RaribleCreateAuctionTransaction,
+        datasource: TzktDatasource,
+    ) -> StartAuctionDto:
+        auction_id = RaribleAware.get_auction_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.sa_asset_contract),
+            token_id=int(transaction.parameter.sa_asset_token_id),
+            seller=ImplicitAccountAddress(transaction.data.sender_address)
+        )
+
+        start = transaction.data.timestamp
+        if transaction.parameter.sa_auction.auction_args_start_time is not None:
+            start = transaction.parameter.sa_auction.auction_args_start_time
+
+        return StartAuctionDto(
+            auction_id=auction_id,
+            sell_contract=OriginatedAccountAddress(transaction.parameter.sa_asset_contract),
+            sell_token_id=int(transaction.parameter.sa_asset_token_id),
+            sell_value=int(transaction.parameter.sa_auction.auction_args_sell_asset_amount),
+            buy_asset_type=transaction.parameter.sa_auction.auction_args_buy_asset_type,
+            buy_asset=RaribleAware.get_asset(transaction.parameter.sa_auction.auction_args_buy_asset_type, bytes.fromhex(transaction.parameter.sa_auction.auction_args_buy_asset)),
+            start_at=start,
+            duration=transaction.parameter.sa_auction.auction_args_duration,
+            min_price=transaction.parameter.sa_auction.auction_args_minimal_price,
+            min_step=transaction.parameter.sa_auction.auction_args_minimal_step,
+            buy_price=transaction.parameter.sa_auction.auction_args_buy_out_price,
+            max_seller_fees=transaction.parameter.sa_auction.auction_args_max_seller_fees
+        )

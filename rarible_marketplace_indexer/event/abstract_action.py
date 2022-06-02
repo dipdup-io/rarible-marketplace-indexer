@@ -1,17 +1,19 @@
 from abc import ABC
 from abc import abstractmethod
+from datetime import timedelta
 from typing import final
 
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import CancelDto, StartAuctionDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
-from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import ActivityModel, AuctionModel, AuctionStatusEnum, AuctionActivityModel
 from rarible_marketplace_indexer.models import ActivityTypeEnum
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.models import OrderStatusEnum
+from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.tezos_objects.asset_value.asset_value import AssetValue
 
 
@@ -556,3 +558,90 @@ class AbstractFloorBidCancelEvent(EventInterface):
         order.last_updated_at = transaction.data.timestamp
 
         await order.save()
+
+class AbstractStartAuctionEvent(EventInterface):
+    @staticmethod
+    @abstractmethod
+    def _get_start_auction_dto(
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ) -> StartAuctionDto:
+        raise NotImplementedError
+
+    @classmethod
+    @final
+    async def handle(
+        cls,
+        transaction: Transaction,
+        datasource: TzktDatasource,
+    ):
+        dto = cls._get_start_auction_dto(transaction, datasource)
+        order_status = AuctionStatusEnum.INACTIVE
+        ongoing = False
+        if dto.start_at == transaction.data.timestamp:
+            order_status = AuctionStatusEnum.ACTIVE
+            ongoing = True
+
+        auction = await AuctionModel.create(
+            network=datasource.network,
+            platform=cls.platform,
+            auction_id=dto.auction_id,
+            status=order_status,
+            start_at=dto.start_at,
+            ended_at=None,
+            created_at=transaction.data.timestamp,
+            end_time=dto.start_at+timedelta(seconds=dto.duration),
+            last_updated_at=transaction.data.timestamp,
+            ongoing=ongoing,
+            seller=transaction.data.sender_address,
+            sell_asset_class=AssetClassEnum.MULTI_TOKEN,
+            sell_contract=dto.sell_contract,
+            sell_token_id=dto.sell_token_id,
+            sell_value=dto.sell_value,
+            buy_asset_class=AssetClassEnum.FUNGIBLE_TOKEN,
+            buy_contract=dto.buy_asset.contract,
+            buy_token_id=dto.buy_asset.token_id,
+            minimal_step=dto.min_step,
+            minimal_price=dto.min_price,
+            duration=dto.duration,
+            buy_price=dto.buy_price,
+            max_seller_fees=dto.max_seller_fees,
+            last_bid_amount=None,
+            last_bid_bidder=None,
+            last_bid_date=None
+        )
+
+        await AuctionActivityModel.create(
+            auction_id=auction.id,
+            type=ActivityTypeEnum.AUCTION_CREATED,
+            network=datasource.network,
+            platform=cls.platform,
+            internal_auction_id=dto.auction_id,
+            bid_value=None,
+            bid_bidder=None,
+            date=transaction.data.timestamp,
+            last_updated_at=transaction.data.timestamp,
+            operation_level=transaction.data.level,
+            operation_timestamp=transaction.data.timestamp,
+            operation_hash=transaction.data.hash,
+            operation_counter=transaction.data.counter,
+            operation_nonce=transaction.data.nonce,
+        )
+
+        if ongoing:
+            await AuctionActivityModel.create(
+                auction_id=auction.id,
+                type=ActivityTypeEnum.AUCTION_STARTED,
+                network=datasource.network,
+                platform=cls.platform,
+                internal_auction_id=dto.auction_id,
+                bid_value=None,
+                bid_bidder=None,
+                date=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                operation_level=transaction.data.level,
+                operation_timestamp=transaction.data.timestamp,
+                operation_hash=transaction.data.hash,
+                operation_counter=transaction.data.counter,
+                operation_nonce=transaction.data.nonce,
+            )

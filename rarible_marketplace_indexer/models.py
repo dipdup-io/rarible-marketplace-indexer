@@ -26,6 +26,7 @@ class TransactionTypeEnum(str, Enum):
     SALE: _StrEnumValue = 'SALE'
     BID: _StrEnumValue = 'BID'
     FLOOR_BID: _StrEnumValue = 'FLOOR_BID'
+    AUCTION: _StrEnumValue = 'AUCTION'
 
 
 class OrderStatusEnum(str, Enum):
@@ -35,6 +36,11 @@ class OrderStatusEnum(str, Enum):
     INACTIVE: _StrEnumValue = 'INACTIVE'
     CANCELLED: _StrEnumValue = 'CANCELLED'
 
+class AuctionStatusEnum(str, Enum):
+    ACTIVE: _StrEnumValue = 'ACTIVE'
+    FINISHED: _StrEnumValue = 'FINISHED'
+    INACTIVE: _StrEnumValue = 'INACTIVE'
+    CANCELLED: _StrEnumValue = 'CANCELLED'
 
 class ActivityTypeEnum(str, Enum):
     GET_BID: _StrEnumValue = 'GET_BID'
@@ -49,6 +55,12 @@ class ActivityTypeEnum(str, Enum):
     TOKEN_MINT: _StrEnumValue = 'MINT'
     TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
     TOKEN_BURN: _StrEnumValue = 'BURN'
+    AUCTION_CREATED: _StrEnumValue = 'AUCTION_CREATED'
+    AUCTION_STARTED: _StrEnumValue = 'AUCTION_STARTED'
+    AUCTION_BID: _StrEnumValue = 'AUCTION_BID'
+    AUCTION_CANCEL: _StrEnumValue = 'AUCTION_CANCEL'
+    AUCTION_FINISHED: _StrEnumValue = 'AUCTION_FINISHED'
+    AUCTION_ENDED: _StrEnumValue = 'AUCTION_ENDED'
 
 
 class PlatformEnum(str, Enum):
@@ -165,6 +177,107 @@ class OrderModel(Model):
         oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, maker, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
+
+class AuctionModel(Model):
+    class Meta:
+        table = 'marketplace_auction'
+
+    _custom_generated_pk = True
+
+    id = fields.UUIDField(pk=True, generated=False, required=True)
+    network = fields.CharField(max_length=16, index=True)
+    platform = fields.CharEnumField(PlatformEnum, index=True)
+    auction_id = fields.CharField(max_length=32, index=True)
+    status = fields.CharEnumField(AuctionStatusEnum, index=True)
+    start_at = fields.DatetimeField()
+    ended_at = fields.DatetimeField(null=True)
+    created_at = fields.DatetimeField(index=True)
+    end_time = fields.DatetimeField(index=True, null=True)
+    last_updated_at = fields.DatetimeField(index=True)
+    ongoing = fields.BooleanField(default=False)
+    seller = AccountAddressField()
+    sell_asset_class = fields.CharEnumField(AssetClassEnum)
+    sell_contract = AccountAddressField(null=True)
+    sell_token_id = fields.TextField(null=True)
+    sell_value = AssetValueField()
+    buy_asset_class = fields.CharEnumField(AssetClassEnum, null=True)
+    buy_contract = AccountAddressField(null=True)
+    buy_token_id = fields.TextField(null=True)
+    minimal_step = fields.IntField()
+    minimal_price = fields.IntField()
+    duration = fields.IntField()
+    buy_price = fields.IntField()
+    max_seller_fees = fields.IntField()
+    last_bid_amount = fields.IntField(null=True)
+    last_bid_bidder = AccountAddressField(null=True)
+    last_bid_date = fields.DatetimeField(null=True)
+
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(network, platform, auction_id, seller, created_at, *args, **kwargs):
+        assert network
+        assert platform
+        assert auction_id
+        assert seller
+        assert created_at
+
+        oid = '.'.join(map(str, filter(bool, [network, platform, auction_id, seller, created_at])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
+class AuctionActivityModel(Model):
+    class Meta:
+        table = 'marketplace_auction_activity'
+
+    _custom_generated_pk = True
+
+    id = fields.UUIDField(pk=True, generated=False, required=True, default=None)
+    auction_id = fields.UUIDField(required=True, index=True)
+    type = fields.CharEnumField(ActivityTypeEnum)
+    network = fields.CharField(max_length=16)
+    platform = fields.CharEnumField(PlatformEnum)
+    internal_auction_id = fields.CharField(max_length=32, index=True)
+    bid_value = fields.IntField(null=True)
+    bid_bidder = AccountAddressField(null=True)
+    date = fields.DatetimeField()
+    last_updated_at = fields.DatetimeField(index=True)
+    operation_level = fields.IntField()
+    operation_timestamp = fields.DatetimeField()
+    operation_hash = OperationHashField()
+    operation_counter = fields.IntField()
+    operation_nonce = fields.IntField(null=True)
+
+    def __init__(self, **kwargs: Any) -> None:
+        try:
+            kwargs['id'] = self.get_id(**kwargs)
+        except TypeError:
+            pass
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def get_id(type, operation_hash, operation_counter, operation_nonce, *args, **kwargs):
+        assert operation_hash
+        assert operation_counter
+
+        oid = '.'.join(map(str, filter(bool, [type, operation_hash, operation_counter, operation_nonce])))
+        return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
+
+    def apply(self, transaction: Transaction):
+        new_id = self.get_id(transaction.data.hash, transaction.data.counter, transaction.data.nonce)
+        activity = self.clone(pk=new_id)
+
+        activity.operation_level = transaction.data.level
+        activity.operation_timestamp = transaction.data.timestamp
+        activity.operation_hash = transaction.data.hash
+        activity.operation_counter = transaction.data.counter
+        activity.operation_nonce = transaction.data.nonce
+
+        return activity
 
 @post_save(OrderModel)
 async def signal_order_post_save(
