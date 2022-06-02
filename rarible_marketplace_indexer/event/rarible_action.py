@@ -304,9 +304,9 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
         )
 
         take = TakeDto(
-            asset_class=AssetClassEnum.MULTI_TOKEN,
+            asset_class=AssetClassEnum.COLLECTION,
             contract=OriginatedAccountAddress(transaction.parameter.pfb_asset_contract),
-            token_id=-1,
+            token_id=None,
             value=AssetValue(transaction.parameter.pfb_bid.bid_asset_qty),
         )
         make_price = AssetValue(make.value / take.value)
