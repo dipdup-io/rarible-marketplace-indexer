@@ -8,7 +8,8 @@ from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
 import rarible_marketplace_indexer.types.rarible_auctions.parameter.put_bid
-from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent
+from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent, AbstractFinishAuctionEvent, \
+    AbstractCancelAuctionEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptFloorBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractBidCancelEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractFloorBidCancelEvent
@@ -18,7 +19,7 @@ from rarible_marketplace_indexer.event.abstract_action import AbstractOrderMatch
 from rarible_marketplace_indexer.event.abstract_action import AbstractPutAuctionBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractPutBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractStartAuctionEvent
-from rarible_marketplace_indexer.event.dto import AssetDto
+from rarible_marketplace_indexer.event.dto import AssetDto, FinishAuctionDto
 from rarible_marketplace_indexer.event.dto import CancelDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MakeDto
@@ -29,6 +30,8 @@ from rarible_marketplace_indexer.event.dto import TakeDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.models import TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
+from rarible_marketplace_indexer.types.rarible_auctions.parameter.cancel_auction import CancelAuctionParameter
+from rarible_marketplace_indexer.types.rarible_auctions.parameter.finish_auction import FinishAuctionParameter
 from rarible_marketplace_indexer.types.rarible_auctions.parameter.put_bid import PutBidParameter
 from rarible_marketplace_indexer.types.rarible_auctions.parameter.start_auction import StartAuctionParameter
 from rarible_marketplace_indexer.types.rarible_auctions.storage import RaribleAuctionsStorage
@@ -478,4 +481,42 @@ class RariblePutAuctionBidEvent(AbstractPutAuctionBidEvent):
 
         return PutAuctionBidDto(
             auction_id=auction_id, bidder=transaction.data.sender_address, bid_value=transaction.parameter.pb_bid.bid_amount
+        )
+
+class RaribleFinishAuctionEvent(AbstractFinishAuctionEvent):
+    platform = PlatformEnum.RARIBLE
+    RaribleFinishAuctionTransaction = Transaction[FinishAuctionParameter, RaribleAuctionsStorage]
+
+    @staticmethod
+    def _get_finish_auction_dto(
+        transaction: RaribleFinishAuctionTransaction,
+        datasource: TzktDatasource,
+    ) -> FinishAuctionDto:
+        auction_id = RaribleAware.get_auction_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.fa_asset_contract),
+            token_id=int(transaction.parameter.fa_asset_id),
+            seller=ImplicitAccountAddress(transaction.parameter.fa_asset_seller),
+        )
+
+        return FinishAuctionDto(
+            auction_id=auction_id
+        )
+
+class RaribleCancelAuctionEvent(AbstractCancelAuctionEvent):
+    platform = PlatformEnum.RARIBLE
+    RaribleCancelAuctionTransaction = Transaction[CancelAuctionParameter, RaribleAuctionsStorage]
+
+    @staticmethod
+    def _get_cancel_auction_dto(
+        transaction: RaribleCancelAuctionTransaction,
+        datasource: TzktDatasource,
+    ) -> FinishAuctionDto:
+        auction_id = RaribleAware.get_auction_hash(
+            contract=OriginatedAccountAddress(transaction.parameter.ca_asset_contract),
+            token_id=int(transaction.parameter.ca_asset_id),
+            seller=ImplicitAccountAddress(transaction.data.sender_address),
+        )
+
+        return FinishAuctionDto(
+            auction_id=auction_id
         )
