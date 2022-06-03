@@ -686,28 +686,52 @@ class AbstractPutAuctionBidEvent(EventInterface):
         auction.last_bid_date = transaction.data.timestamp
         auction.last_bid_amount = dto.bid_value
         auction.last_bid_bidder = dto.bidder
-        auction.status = AuctionStatusEnum.ACTIVE
-        auction.ongoing = True
-        auction.save()
+        if dto.bid_value >= auction.buy_price:
+            auction.status = AuctionStatusEnum.FINISHED
+            auction.ongoing = False
+            auction.ended_at = transaction.data.timestamp
+            auction.save()
 
-        # TODO: handle buyouts
+            await AuctionActivityModel.create(
+                auction_id=auction.id,
+                type=ActivityTypeEnum.AUCTION_FINISHED,
+                network=datasource.network,
+                platform=cls.platform,
+                internal_auction_id=dto.auction_id,
+                bid_value=dto.bid_value,
+                bid_bidder=dto.bidder,
+                date=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                operation_level=transaction.data.level,
+                operation_timestamp=transaction.data.timestamp,
+                operation_hash=transaction.data.hash,
+                operation_counter=transaction.data.counter,
+                operation_nonce=transaction.data.nonce,
+            )
+        else:
+            auction.status = AuctionStatusEnum.ACTIVE
+            auction.ongoing = True
+            auction.save()
 
-        await AuctionActivityModel.create(
-            auction_id=auction.id,
-            type=ActivityTypeEnum.AUCTION_BID,
-            network=datasource.network,
-            platform=cls.platform,
-            internal_auction_id=dto.auction_id,
-            bid_value=dto.bid_value,
-            bid_bidder=dto.bidder,
-            date=transaction.data.timestamp,
-            last_updated_at=transaction.data.timestamp,
-            operation_level=transaction.data.level,
-            operation_timestamp=transaction.data.timestamp,
-            operation_hash=transaction.data.hash,
-            operation_counter=transaction.data.counter,
-            operation_nonce=transaction.data.nonce,
-        )
+            await AuctionActivityModel.create(
+                auction_id=auction.id,
+                type=ActivityTypeEnum.AUCTION_BID,
+                network=datasource.network,
+                platform=cls.platform,
+                internal_auction_id=dto.auction_id,
+                bid_value=dto.bid_value,
+                bid_bidder=dto.bidder,
+                date=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                operation_level=transaction.data.level,
+                operation_timestamp=transaction.data.timestamp,
+                operation_hash=transaction.data.hash,
+                operation_counter=transaction.data.counter,
+                operation_nonce=transaction.data.nonce,
+            )
+
+
+
 
 
 class AbstractFinishAuctionEvent(EventInterface):
