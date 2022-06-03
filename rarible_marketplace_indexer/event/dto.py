@@ -79,6 +79,7 @@ class PutAuctionBidDto:
     bidder: ImplicitAccountAddress
     bid_value: Optional[AssetValue]
 
+
 @dataclass
 class FinishAuctionDto:
     auction_id: str

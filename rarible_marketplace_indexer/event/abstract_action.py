@@ -6,7 +6,8 @@ from typing import final
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-from rarible_marketplace_indexer.event.dto import CancelDto, FinishAuctionDto
+from rarible_marketplace_indexer.event.dto import CancelDto
+from rarible_marketplace_indexer.event.dto import FinishAuctionDto
 from rarible_marketplace_indexer.event.dto import ListDto
 from rarible_marketplace_indexer.event.dto import MatchDto
 from rarible_marketplace_indexer.event.dto import PutAuctionBidDto
@@ -708,6 +709,7 @@ class AbstractPutAuctionBidEvent(EventInterface):
             operation_nonce=transaction.data.nonce,
         )
 
+
 class AbstractFinishAuctionEvent(EventInterface):
     @staticmethod
     @abstractmethod
@@ -758,6 +760,7 @@ class AbstractFinishAuctionEvent(EventInterface):
             operation_counter=transaction.data.counter,
             operation_nonce=transaction.data.nonce,
         )
+
 
 class AbstractCancelAuctionEvent(EventInterface):
     @staticmethod

@@ -25,7 +25,7 @@ class XtzAssetType(AbstractAssetType):
 
 
 class AbstractTokenAssetType(AbstractAssetType, ABC):
-    contract: OriginatedAccountAddress
+    contract: Optional[OriginatedAccountAddress]
     token_id: Optional[str]
 
 

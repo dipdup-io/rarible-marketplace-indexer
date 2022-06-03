@@ -307,3 +307,29 @@ async def signal_activity_post_save(
     from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.factory import RaribleApiOrderActivityFactory
 
     await producer_send(RaribleApiOrderActivityFactory.build(instance))
+
+
+@post_save(AuctionModel)
+async def signal_auction_post_save(
+    sender: AuctionModel,
+    instance: AuctionModel,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
+) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.auction.factory import RaribleApiAuctionFactory
+
+    await producer_send(RaribleApiAuctionFactory.build(instance))
+
+
+@post_save(AuctionActivityModel)
+async def signal_auction_activity_post_save(
+    sender: AuctionActivityModel,
+    instance: AuctionActivityModel,
+    created: bool,
+    using_db: "Optional[BaseDBAsyncClient]",
+    update_fields: List[str],
+) -> None:
+    from rarible_marketplace_indexer.types.rarible_api_objects.activity.auction.factory import RaribleApiAuctionActivityFactory
+
+    await producer_send(RaribleApiAuctionActivityFactory.build(instance))
