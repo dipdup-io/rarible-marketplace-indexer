@@ -12,7 +12,7 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Op
 
 
 class AbstractRaribleApiAuctionActivity(AbstractRaribleApiObject):
-    _kafka_topic = KafkaTopic.ACTIVITY_TOPIC
+    _kafka_topic = KafkaTopic.AUCTION_ACTIVITY_TOPIC
     type: str
     auction_id: uuid.UUID
     source: PlatformEnum
