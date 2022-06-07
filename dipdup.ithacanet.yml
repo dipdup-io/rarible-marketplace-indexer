@@ -8,7 +8,7 @@ contracts:
     address: KT1K2mNPj9U9497KjUggkgGcuuPsKrLr34zW
     typename: rarible_exchange
   rarible_bids_ithacanet:
-    address: KT1UcBbv2D84mZ9tZx4MVLbCNyC5ihJERED2
+    address: KT1MwKGYWWbXtfYdnQfwspwz5ZGfqGwiJuQF
     typename: rarible_bids
   rarible_auctions_ithacanet:
     address: KT1CB5JBSC7kTxRV3ir2xsooMA1FLieiD4Mt

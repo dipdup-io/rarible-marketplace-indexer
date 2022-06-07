@@ -39,9 +39,8 @@ class ListDto:
     make_price: BaseValue
     make: MakeDto
     take: TakeDto
-    started_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
-    ended_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
-
+    start_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
+    end_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
 
 @dataclass
 class CancelDto:

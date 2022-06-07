@@ -49,16 +49,16 @@ class AbstractOrderListEvent(EventInterface):
         datasource: TzktDatasource,
     ):
         dto = cls._get_list_dto(transaction, datasource)
-        if not dto.started_at:
-            dto.started_at = transaction.data.timestamp
+        if not dto.start_at:
+            dto.start_at = transaction.data.timestamp
 
         order = await OrderModel.create(
             network=datasource.network,
             platform=cls.platform,
             internal_order_id=dto.internal_order_id,
             status=OrderStatusEnum.ACTIVE,
-            started_at=dto.started_at,
-            ended_at=dto.ended_at,
+            start_at=dto.start_at,
+            end_at=dto.end_at,
             make_stock=dto.make.value,
             salt=transaction.data.counter,
             created_at=transaction.data.timestamp,
@@ -227,6 +227,9 @@ class AbstractPutBidEvent(EventInterface):
     ):
         dto = cls._get_bid_dto(transaction, datasource)
 
+        if dto.end_at is None:
+            dto.end_at = dto.start_at + timedelta(weeks=1)
+
         order = await OrderModel.get_or_none(
             internal_order_id=dto.internal_order_id, network=datasource.network, platform=cls.platform, status=OrderStatusEnum.ACTIVE
         )
@@ -237,8 +240,8 @@ class AbstractPutBidEvent(EventInterface):
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
-                started_at=transaction.data.timestamp,
-                ended_at=dto.ended_at,
+                start_at=dto.start_at,
+                end_at=dto.end_at,
                 make_stock=dto.make.value,
                 salt=transaction.data.counter,
                 created_at=transaction.data.timestamp,
@@ -302,6 +305,9 @@ class AbstractPutFloorBidEvent(EventInterface):
     ):
         dto = cls._get_floor_bid_dto(transaction, datasource)
 
+        if dto.end_at is None:
+            dto.end_at = dto.start_at + timedelta(weeks=1)
+
         order = await OrderModel.get_or_none(
             internal_order_id=dto.internal_order_id, network=datasource.network, platform=cls.platform, status=OrderStatusEnum.ACTIVE
         )
@@ -312,8 +318,8 @@ class AbstractPutFloorBidEvent(EventInterface):
                 platform=cls.platform,
                 internal_order_id=dto.internal_order_id,
                 status=OrderStatusEnum.ACTIVE,
-                started_at=transaction.data.timestamp,
-                ended_at=dto.ended_at,
+                start_at=dto.start_at,
+                end_at=dto.end_at,
                 make_stock=dto.make.value,
                 salt=transaction.data.counter,
                 created_at=transaction.data.timestamp,

@@ -23,11 +23,12 @@ class RaribleApiOrder(AbstractRaribleApiObject):
     fill: Xtz
     platform: PlatformEnum
     status: OrderStatusEnum
-    started_at: datetime
-    ended_at: Optional[datetime]
+    start_at: datetime
+    end_at: Optional[datetime]
     make_stock: AssetValue
     cancelled: bool
     created_at: datetime
+    ended_at: Optional[datetime]
     last_updated_at: datetime
     make_price: Xtz
     maker: ImplicitAccountAddress
