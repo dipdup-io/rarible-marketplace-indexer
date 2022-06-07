@@ -18,6 +18,7 @@ class RaribleBidsStorage(BaseModel):
     protocol_fee: str
     transfer_manager: str
     bids_storage: str
+    default_bid_duration: int
     owner_candidate: Optional[str]
     max_bundle_items: str
     metadata: Dict[str, str]

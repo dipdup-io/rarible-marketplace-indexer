@@ -25,10 +25,10 @@ from rarible_marketplace_indexer.models import TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import AcceptBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import AcceptFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_bid import AcceptBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_floor_bid import AcceptFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.put_floor_bid import PutFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.buy import BuyParameter
 from rarible_marketplace_indexer.types.rarible_exchange.parameter.cancel_sale import CancelSaleParameter
@@ -198,6 +198,8 @@ class RaribleOrderListEvent(AbstractOrderListEvent):
                 value=make_value,
             ),
             take=take,
+            start_at=transaction.parameter.s_sale.sale_start,
+            end_at=transaction.parameter.s_sale.sale_end
         )
 
 
@@ -278,6 +280,8 @@ class RariblePutBidEvent(AbstractPutBidEvent):
             make_price=make_price,
             make=make,
             take=take,
+            start_at=transaction.data.timestamp,
+            end_at=transaction.parameter.pb_bid.bid_expiry_date
         )
 
 
@@ -317,6 +321,8 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
             make_price=make_price,
             make=make,
             take=take,
+            start_at=transaction.data.timestamp,
+            end_at=transaction.parameter.pfb_bid.bid_expiry_date
         )
 
 

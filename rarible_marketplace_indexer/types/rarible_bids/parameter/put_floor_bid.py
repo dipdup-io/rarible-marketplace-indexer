@@ -34,6 +34,7 @@ class PfbBid(BaseModel):
     bid_payouts: List[BidPayout]
     bid_amount: str
     bid_asset_qty: str
+    bid_expiry_date: Optional[str]
     bid_data_type: Optional[str]
     bid_data: Optional[str]
 
