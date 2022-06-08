@@ -25,7 +25,7 @@ class AbstractRaribleApiOrderActivity(AbstractRaribleApiObject):
 
 
 class RaribleApiOrderListActivity(AbstractRaribleApiOrderActivity):
-    type: Literal[ActivityTypeEnum.ORDER_LIST] = ActivityTypeEnum.ORDER_LIST
+    type: Literal[ActivityTypeEnum.ORDER_LIST, ActivityTypeEnum.MAKE_BID, ActivityTypeEnum.MAKE_FLOOR_BID] = ActivityTypeEnum.ORDER_LIST
     maker: ImplicitAccountAddress
     make: AbstractAsset
     take: Optional[AbstractAsset]
@@ -33,7 +33,7 @@ class RaribleApiOrderListActivity(AbstractRaribleApiOrderActivity):
 
 
 class RaribleApiOrderMatchActivity(AbstractRaribleApiOrderActivity):
-    type: Literal[ActivityTypeEnum.ORDER_MATCH] = ActivityTypeEnum.ORDER_MATCH
+    type: Literal[ActivityTypeEnum.ORDER_MATCH, ActivityTypeEnum.GET_BID, ActivityTypeEnum.GET_FLOOR_BID] = ActivityTypeEnum.ORDER_MATCH
     nft: AbstractAsset
     payment: Optional[AbstractAsset]
     buyer: ImplicitAccountAddress
@@ -42,7 +42,7 @@ class RaribleApiOrderMatchActivity(AbstractRaribleApiOrderActivity):
 
 
 class RaribleApiOrderCancelActivity(AbstractRaribleApiOrderActivity):
-    type: Literal[ActivityTypeEnum.ORDER_CANCEL] = ActivityTypeEnum.ORDER_CANCEL
+    type: Literal[ActivityTypeEnum.ORDER_CANCEL, ActivityTypeEnum.CANCEL_BID, ActivityTypeEnum.CANCEL_FLOOR_BID] = ActivityTypeEnum.ORDER_CANCEL
     maker: ImplicitAccountAddress
     make: AbstractAsset
     take: Optional[AbstractAsset]
