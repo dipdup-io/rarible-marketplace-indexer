@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "~3.10"
-dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "feat/token-index"}
+dipdup = {git = "https://github.com/dipdup-net/dipdup-py.git", branch = "fix/transfers_subscription"}
 
 aiokafka = "^0.7.2"
 base58 = "^2.1.1"

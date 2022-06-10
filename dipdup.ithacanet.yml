@@ -29,3 +29,9 @@ indexes:
         pattern:
           - destination: rarible_exchange_ithacanet
             entrypoint: buy
+
+  token_transfers:
+    kind: token_transfer
+    datasource: tzkt_ithacanet
+    handlers:
+      - callback: on_transfer
