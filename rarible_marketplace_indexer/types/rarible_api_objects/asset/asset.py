@@ -82,7 +82,7 @@ class Asset(AbstractAsset):
                 'asset_type': {
                     'asset_class': model.sell_asset_class,
                     'contract': model.sell_contract,
-                    'token_id': model.sell_asset_class,
+                    'token_id': model.sell_token_id,
                 },
                 'asset_value': model.sell_value,
             },
