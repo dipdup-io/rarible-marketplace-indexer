@@ -9,6 +9,7 @@ from pydantic import parse_obj_as
 from typing_extensions import Annotated
 
 from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import AuctionModel
 from rarible_marketplace_indexer.models import OrderModel
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import TokenAssetType
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset_type import XtzAssetType
@@ -24,7 +25,9 @@ class AbstractAsset(BaseModel):
 
 
 class TokenAsset(AbstractAsset):
-    _asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN, AssetClassEnum.COLLECTION] = None
+    _asset_class: Literal[
+        AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN, AssetClassEnum.COLLECTION
+    ] = None
     asset_type: TokenAssetType
     asset_value: AssetValue
 
@@ -67,6 +70,21 @@ class Asset(AbstractAsset):
                     'token_id': model.take_token_id,
                 },
                 'asset_value': model.take_value,
+            },
+        )
+        return asset.__root__
+
+    @classmethod
+    def sell_from_auction_model(cls, model: AuctionModel) -> Optional[AbstractAsset]:
+        asset = parse_obj_as(
+            cls,
+            {
+                'asset_type': {
+                    'asset_class': model.sell_asset_class,
+                    'contract': model.sell_contract,
+                    'token_id': model.sell_token_id,
+                },
+                'asset_value': model.sell_value,
             },
         )
         return asset.__root__

@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import Literal, Optional
+from typing import Literal
+from typing import Optional
 from typing import Union
 
 from humps.main import camelize
@@ -24,7 +25,7 @@ class XtzAssetType(AbstractAssetType):
 
 
 class AbstractTokenAssetType(AbstractAssetType, ABC):
-    contract: OriginatedAccountAddress
+    contract: Optional[OriginatedAccountAddress]
     token_id: Optional[str]
 
 

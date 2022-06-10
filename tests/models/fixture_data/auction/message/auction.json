@@ -1,0 +1,32 @@
+{
+  "id": "427d1b55-fff3-5af7-ad49-6d817b0f7d14",
+  "network": "ithacanet",
+  "platform": "Rarible",
+  "contract": "KT1EreNsT2gXRvuTUrpx6Ju4WMug5xcEpr43",
+  "seller": "tz1Mxsc66En4HsVHr6rppYZW82ZpLhpupToC",
+  "sell": {
+    "assetType": {
+      "assetClass": "TEZOS_MT",
+      "contract": "KT1EreNsT2gXRvuTUrpx6Ju4WMug5xcEpr43",
+      "tokenId": "1"
+    },
+    "assetValue": "1"
+  },
+  "buy": {
+    "type": "TEZOS_FT",
+    "contract": null,
+    "tokenId": null
+  },
+  "endTime": "2022-05-02T18:20:15+00:00",
+  "minimalStep": "1",
+  "minimalPrice": "10",
+  "createdAt": "2022-05-02T15:33:35+00:00",
+  "lastUpdatedAt": "2022-05-02T15:33:35+00:00",
+  "buyPrice": "100000",
+  "status": "ACTIVE",
+  "ongoing": true,
+  "hash": "1ed421e034a451d89ecb57f487595b28",
+  "startAt": "2022-05-02T15:33:35+00:00",
+  "auctionId": "1ed421e034a451d89ecb57f487595b28",
+  "lastBid": null
+}

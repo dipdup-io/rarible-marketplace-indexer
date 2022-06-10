@@ -15,15 +15,20 @@ from _pytest.fixtures import SubRequest
 from pydantic import BaseModel
 from tortoise.models import Model
 
-from rarible_marketplace_indexer.models import ActivityModel
+from rarible_marketplace_indexer.models import ActivityModel, AuctionModel
+from rarible_marketplace_indexer.models import AuctionActivityModel
 from rarible_marketplace_indexer.models import OrderModel
+from rarible_marketplace_indexer.types.rarible_api_objects.activity.auction.activity import RaribleApiAuctionActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderActivity
+from rarible_marketplace_indexer.types.rarible_api_objects.auction.auction import RaribleApiAuction
 from rarible_marketplace_indexer.types.rarible_api_objects.order.order import RaribleApiOrder
 
 
 class TestingSubject:
     order: str = 'order'
     activity: str = 'activity'
+    auction: str = 'auction'
+    auction_activity: str = 'auction_activity'
 
 
 @dataclass
@@ -43,6 +48,16 @@ class TestActivityData(TestModelData):
     test_api_object: RaribleApiOrderActivity
 
 
+class TestAuctionData(TestModelData):
+    test_model: Optional[AuctionModel]
+    test_api_object: RaribleApiAuction
+
+
+class TestAuctionActivityData(TestModelData):
+    test_model: Optional[AuctionActivityModel]
+    test_api_object: RaribleApiAuctionActivity
+
+
 def import_object(object_name: str, object_type: str, testcase_name: str):
     try:
         test_module = import_module(f'tests.models.fixture_data.{object_name}.{object_type}.{testcase_name}')
@@ -58,6 +73,8 @@ def data_loader(object_type: str):
     fixtures: Dict[str, Type[TestModelData]] = {
         TestingSubject.order: TestOrderData,
         TestingSubject.activity: TestActivityData,
+        TestingSubject.auction: TestAuctionData,
+        TestingSubject.auction_activity: TestAuctionActivityData,
     }
 
     object_dataclass = fixtures[object_type]
@@ -93,6 +110,16 @@ def activity_model_data_provider(request: SubRequest):
 
 @pytest.fixture(params=data_loader(TestingSubject.activity))
 def activity_serializer_data_provider(request: SubRequest):
+    return request.param
+
+
+@pytest.fixture(params=data_loader(TestingSubject.auction))
+def auction_data_provider(request: SubRequest):
+    return request.param
+
+
+@pytest.fixture(params=data_loader(TestingSubject.auction_activity))
+def auction_activity_data_provider(request: SubRequest):
     return request.param
 
 

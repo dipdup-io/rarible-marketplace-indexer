@@ -72,7 +72,7 @@ class RaribleApiOrderActivityFactory:
             ActivityTypeEnum.GET_BID: cls._build_match_activity,
             ActivityTypeEnum.GET_FLOOR_BID: cls._build_match_activity,
             ActivityTypeEnum.CANCEL_BID: cls._build_cancel_activity,
-            ActivityTypeEnum.CANCEL_FLOOR_BID: cls._build_cancel_activity
+            ActivityTypeEnum.CANCEL_FLOOR_BID: cls._build_cancel_activity,
         }
 
         return method_map.get(activity.type, cls._build_list_activity)
