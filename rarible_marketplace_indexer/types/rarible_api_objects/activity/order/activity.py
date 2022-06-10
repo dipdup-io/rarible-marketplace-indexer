@@ -42,7 +42,9 @@ class RaribleApiOrderMatchActivity(AbstractRaribleApiOrderActivity):
 
 
 class RaribleApiOrderCancelActivity(AbstractRaribleApiOrderActivity):
-    type: Literal[ActivityTypeEnum.ORDER_CANCEL, ActivityTypeEnum.CANCEL_BID, ActivityTypeEnum.CANCEL_FLOOR_BID] = ActivityTypeEnum.ORDER_CANCEL
+    type: Literal[
+        ActivityTypeEnum.ORDER_CANCEL, ActivityTypeEnum.CANCEL_BID, ActivityTypeEnum.CANCEL_FLOOR_BID
+    ] = ActivityTypeEnum.ORDER_CANCEL
     maker: ImplicitAccountAddress
     make: AbstractAsset
     take: Optional[AbstractAsset]

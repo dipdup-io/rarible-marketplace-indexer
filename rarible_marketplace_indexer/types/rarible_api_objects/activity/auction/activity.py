@@ -26,6 +26,10 @@ class RaribleApiAuctionStartActivity(AbstractRaribleApiAuctionActivity):
     type: Literal[ActivityTypeEnum.AUCTION_STARTED] = ActivityTypeEnum.AUCTION_STARTED
 
 
+class RaribleApiAuctionCreateActivity(AbstractRaribleApiAuctionActivity):
+    type: Literal[ActivityTypeEnum.AUCTION_CREATED] = ActivityTypeEnum.AUCTION_CREATED
+
+
 class RaribleApiAuctionPutBidActivity(AbstractRaribleApiAuctionActivity):
     type: Literal[ActivityTypeEnum.AUCTION_BID] = ActivityTypeEnum.AUCTION_BID
     bid: AuctionBid
@@ -39,6 +43,15 @@ class RaribleApiAuctionFinishActivity(AbstractRaribleApiAuctionActivity):
     type: Literal[ActivityTypeEnum.AUCTION_FINISHED] = ActivityTypeEnum.AUCTION_FINISHED
 
 
+class RaribleApiAuctionEndActivity(AbstractRaribleApiAuctionActivity):
+    type: Literal[ActivityTypeEnum.AUCTION_ENDED] = ActivityTypeEnum.AUCTION_ENDED
+
+
 RaribleApiAuctionActivity = Union[
-    RaribleApiAuctionStartActivity, RaribleApiAuctionPutBidActivity, RaribleApiAuctionCancelActivity, RaribleApiAuctionFinishActivity
+    RaribleApiAuctionStartActivity,
+    RaribleApiAuctionPutBidActivity,
+    RaribleApiAuctionCancelActivity,
+    RaribleApiAuctionFinishActivity,
+    RaribleApiAuctionCreateActivity,
+    RaribleApiAuctionEndActivity,
 ]

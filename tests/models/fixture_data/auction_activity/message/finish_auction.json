@@ -1,0 +1,11 @@
+{
+  "id": "bfd61bb9-5348-5a1c-91a9-9f4d35c2cdf1",
+  "network": "ithacanet",
+  "type": "AUCTION_FINISHED",
+  "auctionId": "f5f26042-cf6d-5b1b-9e64-30896b516356",
+  "source": "Rarible",
+  "hash": "opV3Rj694sqZPJboq9PvhJRDdyo8d5MQ3o8k7umeiunehu2tezx",
+  "date": "2022-05-03T08:32:10+00:00",
+  "lastUpdatedAt": "2022-05-03T08:32:10+00:00",
+  "reverted": false
+}

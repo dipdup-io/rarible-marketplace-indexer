@@ -42,6 +42,7 @@ class ListDto:
     start_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
     end_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
 
+
 @dataclass
 class CancelDto:
     internal_order_id: str

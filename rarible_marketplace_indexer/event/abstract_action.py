@@ -737,9 +737,6 @@ class AbstractPutAuctionBidEvent(EventInterface):
             )
 
 
-
-
-
 class AbstractFinishAuctionEvent(EventInterface):
     @staticmethod
     @abstractmethod

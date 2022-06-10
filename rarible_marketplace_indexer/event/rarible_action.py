@@ -7,7 +7,6 @@ from base58 import b58encode_check
 from dipdup.datasources.tzkt.datasource import TzktDatasource
 from dipdup.models import Transaction
 
-import rarible_marketplace_indexer.types.rarible_auctions.parameter.put_bid
 from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractAcceptFloorBidEvent
 from rarible_marketplace_indexer.event.abstract_action import AbstractBidCancelEvent
@@ -37,10 +36,10 @@ from rarible_marketplace_indexer.types.rarible_auctions.parameter.finish_auction
 from rarible_marketplace_indexer.types.rarible_auctions.parameter.put_bid import PutBidParameter as PutAuctionBidParameter
 from rarible_marketplace_indexer.types.rarible_auctions.parameter.start_auction import StartAuctionParameter
 from rarible_marketplace_indexer.types.rarible_auctions.storage import RaribleAuctionsStorage
-from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_bid import AcceptBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_floor_bid import AcceptFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_floor_bid import PutFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
@@ -229,7 +228,7 @@ class RaribleOrderListEvent(AbstractOrderListEvent):
             ),
             take=take,
             start_at=transaction.parameter.s_sale.sale_start,
-            end_at=transaction.parameter.s_sale.sale_end
+            end_at=transaction.parameter.s_sale.sale_end,
         )
 
 
@@ -311,7 +310,7 @@ class RariblePutBidEvent(AbstractPutBidEvent):
             make=make,
             take=take,
             start_at=transaction.data.timestamp,
-            end_at=transaction.parameter.pb_bid.bid_expiry_date
+            end_at=transaction.parameter.pb_bid.bid_expiry_date,
         )
 
 
@@ -352,7 +351,7 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
             make=make,
             take=take,
             start_at=transaction.data.timestamp,
-            end_at=transaction.parameter.pfb_bid.bid_expiry_date
+            end_at=transaction.parameter.pfb_bid.bid_expiry_date,
         )
 
 
