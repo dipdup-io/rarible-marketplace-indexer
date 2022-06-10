@@ -44,6 +44,7 @@ class PlatformEnum(str, Enum):
     OBJKT: _StrEnumValue = 'Objkt'
     OBJKT_V2: _StrEnumValue = 'Objkt_v2'
     RARIBLE: _StrEnumValue = 'Rarible'
+    FXHASH_V1: _StrEnumValue = 'Fxhash_v1'
 
 
 class ActivityModel(Model):
