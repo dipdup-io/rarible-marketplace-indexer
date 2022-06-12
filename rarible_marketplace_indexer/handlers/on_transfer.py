@@ -10,5 +10,4 @@ async def on_transfer(
     token_transfer: TokenTransferData,
 ) -> None:
     token_transfer_activity = RaribleApiTokenActivityFactory.build(token_transfer, ctx.datasource)
-    assert token_transfer_activity
     await producer_send(token_transfer_activity)

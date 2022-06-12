@@ -80,7 +80,7 @@ indexes:
           - destination: objkt_v2_mainnet
             entrypoint: fulfill_ask
 
-  token_ransfers:
+  token_transfers:
     kind: token_transfer
     datasource: tzkt_mainnet
     handlers:
