@@ -72,9 +72,7 @@ class AbstractOrderListEvent(EventInterface):
                 take_token_id=dto.take.token_id,
                 take_value=dto.take.value,
             )
-            print(f"new order: {order.id}")
         else:
-            print(f"old order: {order.id}")
             order.last_updated_at = transaction.data.timestamp
             order.make_value = dto.make.value
             order.take_value = dto.take.value
