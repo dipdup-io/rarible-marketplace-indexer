@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
       - kafka0
-    command: [ "-c", "dipdup.yml", "-c", "dipdup.${RARIBLE_ENV:-mainnet}.yml", "-c", "dipdup.prod.yml", "run" ]
+    command: [ "-c", "dipdup.yml", "-c", "dipdup.ithacanet.yml", "-c", "dipdup.prod.yml", "run" ]
     restart: "no"
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
@@ -61,6 +61,9 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
+    ports:
+      - "127.0.0.1:2181:2181"
+      - "127.0.0.1:2188:2188"
 
   kafka0:
     depends_on:
@@ -90,6 +93,9 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
     volumes:
       - kafka-data:/var/lib/kafka/data
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:9094:9094"
 
   kafdrop:
     depends_on:

@@ -22,6 +22,12 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Op
 _StrEnumValue = TypeVar("_StrEnumValue")
 
 
+class TransactionTypeEnum(str, Enum):
+    SALE: _StrEnumValue = 'SALE'
+    BID: _StrEnumValue = 'BID'
+    FLOOR_BID: _StrEnumValue = 'FLOOR_BID'
+
+
 class OrderStatusEnum(str, Enum):
     ACTIVE: _StrEnumValue = 'ACTIVE'
     FILLED: _StrEnumValue = 'FILLED'
@@ -31,9 +37,15 @@ class OrderStatusEnum(str, Enum):
 
 
 class ActivityTypeEnum(str, Enum):
+    GET_BID: _StrEnumValue = 'GET_BID'
+    GET_FLOOR_BID: _StrEnumValue = 'GET_FLOOR_BID'
     ORDER_LIST: _StrEnumValue = 'LIST'
     ORDER_MATCH: _StrEnumValue = 'SELL'
     ORDER_CANCEL: _StrEnumValue = 'CANCEL_LIST'
+    CANCEL_BID: _StrEnumValue = 'CANCEL_BID'
+    CANCEL_FLOOR_BID: _StrEnumValue = 'CANCEL_FLOOR_BID'
+    MAKE_BID: _StrEnumValue = 'MAKE_BID'
+    MAKE_FLOOR_BID: _StrEnumValue = 'MAKE_FLOOR_BID'
     TOKEN_MINT: _StrEnumValue = 'MINT'
     TOKEN_TRANSFER: _StrEnumValue = 'TRANSFER'
     TOKEN_BURN: _StrEnumValue = 'BURN'
@@ -58,9 +70,8 @@ class ActivityModel(Model):
     network = fields.CharField(max_length=16)
     platform = fields.CharEnumField(PlatformEnum)
     internal_order_id = fields.CharField(max_length=32, index=True)
-    maker = AccountAddressField()
+    maker = AccountAddressField(null=True)
     taker = AccountAddressField(null=True)
-    sell_price = XtzField()
     make_asset_class = fields.CharEnumField(AssetClassEnum)
     make_contract = AccountAddressField(null=True)
     make_token_id = fields.TextField(null=True)
@@ -116,14 +127,13 @@ class OrderModel(Model):
     platform = fields.CharEnumField(PlatformEnum, index=True)
     internal_order_id = fields.CharField(max_length=32, index=True)
     status = fields.CharEnumField(OrderStatusEnum, index=True)
-    started_at = fields.DatetimeField()
-    ended_at = fields.DatetimeField(null=True)
-    make_stock = AssetValueField()
+    start_at = fields.DatetimeField()
+    end_at = fields.DatetimeField(null=True)
     cancelled = fields.BooleanField(default=False)
     salt = fields.BigIntField()
     created_at = fields.DatetimeField(index=True)
+    ended_at = fields.DatetimeField(null=True)
     last_updated_at = fields.DatetimeField(index=True)
-    make_price = XtzField()
     maker = AccountAddressField()
     taker = AccountAddressField(null=True)
     make_asset_class = fields.CharEnumField(AssetClassEnum)
@@ -143,12 +153,14 @@ class OrderModel(Model):
         super().__init__(**kwargs)
 
     @staticmethod
-    def get_id(network, platform, internal_order_id, *args, **kwargs):
+    def get_id(network, platform, internal_order_id, maker, created_at, *args, **kwargs):
         assert network
         assert platform
         assert internal_order_id
+        assert maker
+        assert created_at
 
-        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id])))
+        oid = '.'.join(map(str, filter(bool, [network, platform, internal_order_id, maker, created_at])))
         return uuid5(namespace=uuid.NAMESPACE_OID, name=oid)
 
 

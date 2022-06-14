@@ -13,8 +13,8 @@ from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import Or
 @dataclass
 class MakeDto:
     asset_class: AssetClassEnum
-    contract: OriginatedAccountAddress
-    token_id: int
+    contract: Optional[OriginatedAccountAddress]
+    token_id: Optional[int]
     value: AssetValue
 
 
@@ -30,11 +30,10 @@ class TakeDto:
 class ListDto:
     internal_order_id: str
     maker: ImplicitAccountAddress
-    make_price: BaseValue
     make: MakeDto
     take: TakeDto
-    started_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
-    ended_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
+    start_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
+    end_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
 
 
 @dataclass
@@ -45,5 +44,7 @@ class CancelDto:
 @dataclass
 class MatchDto:
     internal_order_id: str
-    match_amount: AssetValue
+    taker: str
+    token_id: Optional[int]
+    match_amount: Optional[AssetValue]
     match_timestamp: datetime

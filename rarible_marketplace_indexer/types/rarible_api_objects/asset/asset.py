@@ -24,7 +24,9 @@ class AbstractAsset(BaseModel):
 
 
 class TokenAsset(AbstractAsset):
-    _asset_class: Literal[AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN] = None
+    _asset_class: Literal[
+        AssetClassEnum.FUNGIBLE_TOKEN, AssetClassEnum.NON_FUNGIBLE_TOKEN, AssetClassEnum.MULTI_TOKEN, AssetClassEnum.COLLECTION
+    ] = None
     asset_type: TokenAssetType
     asset_value: AssetValue
 
