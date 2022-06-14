@@ -45,28 +45,40 @@ class AbstractOrderListEvent(EventInterface):
         if not dto.start_at:
             dto.start_at = transaction.data.timestamp
 
-        order = await OrderModel.create(
-            network=datasource.network,
-            platform=cls.platform,
-            internal_order_id=dto.internal_order_id,
-            status=OrderStatusEnum.ACTIVE,
-            start_at=dto.start_at,
-            end_at=dto.end_at,
-            make_stock=dto.make.value,
-            salt=transaction.data.counter,
-            created_at=transaction.data.timestamp,
-            last_updated_at=transaction.data.timestamp,
-            make_price=dto.make_price,
-            maker=dto.maker,
-            make_asset_class=dto.make.asset_class,
-            make_contract=dto.make.contract,
-            make_token_id=dto.make.token_id,
-            make_value=dto.make.value,
-            take_asset_class=dto.take.asset_class,
-            take_contract=dto.take.contract,
-            take_token_id=dto.take.token_id,
-            take_value=dto.take.value,
+        order = await OrderModel.get_or_none(
+            internal_order_id=dto.internal_order_id, network=datasource.network, platform=cls.platform, status=OrderStatusEnum.ACTIVE
         )
+
+        if order is None:
+            order = await OrderModel.create(
+                network=datasource.network,
+                platform=cls.platform,
+                internal_order_id=dto.internal_order_id,
+                status=OrderStatusEnum.ACTIVE,
+                start_at=dto.start_at,
+                end_at=dto.end_at,
+                make_stock=dto.make.value,
+                salt=transaction.data.counter,
+                created_at=transaction.data.timestamp,
+                last_updated_at=transaction.data.timestamp,
+                make_price=dto.make_price,
+                maker=dto.maker,
+                make_asset_class=dto.make.asset_class,
+                make_contract=dto.make.contract,
+                make_token_id=dto.make.token_id,
+                make_value=dto.make.value,
+                take_asset_class=dto.take.asset_class,
+                take_contract=dto.take.contract,
+                take_token_id=dto.take.token_id,
+                take_value=dto.take.value,
+            )
+            print(f"new order: {order.id}")
+        else:
+            print(f"old order: {order.id}")
+            order.last_updated_at = transaction.data.timestamp
+            order.make_value = dto.make.value
+            order.take_value = dto.take.value
+            order.save()
 
         await ActivityModel.create(
             type=ActivityTypeEnum.ORDER_LIST,

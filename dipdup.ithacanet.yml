@@ -5,7 +5,7 @@ datasources:
 
 contracts:
   rarible_exchange_ithacanet:
-    address: KT1K2mNPj9U9497KjUggkgGcuuPsKrLr34zW
+    address: KT199VxDKE7TLxoHwc3pbu9NgKhaUSki8x9i
     typename: rarible_exchange
   rarible_bids_ithacanet:
     address: KT1MwKGYWWbXtfYdnQfwspwz5ZGfqGwiJuQF
