@@ -24,11 +24,9 @@ order_api_object = RaribleApiOrder(
     start_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
     end_at=None,
     ended_at=None,
-    make_stock=AssetValue(291),
     cancelled=False,
     created_at=datetime(2021, 8, 9, 13, 7, 30, tzinfo=UTC),
     last_updated_at=datetime(2021, 8, 7, 15, 45, 46, tzinfo=UTC),
-    make_price=Xtz(1),
     maker=ImplicitAccountAddress('tz2NY3Fgt5QufrYGP1JKdvLKcWWt86sLsqrS'),
     taker=None,
     make=TokenAsset(

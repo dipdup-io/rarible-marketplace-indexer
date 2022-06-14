@@ -38,5 +38,4 @@ activity_api_object = RaribleApiOrderMatchActivity(
     ),
     buyer=ImplicitAccountAddress('tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv'),
     seller=ImplicitAccountAddress('tz1bn9ud4BmNGSCTWT86gB23ynR7tuWk8gAk'),
-    price=Xtz(3),
 )

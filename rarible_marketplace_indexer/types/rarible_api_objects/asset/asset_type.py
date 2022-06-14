@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import Literal, Optional
+from typing import Literal
+from typing import Optional
 from typing import Union
 
 from humps.main import camelize

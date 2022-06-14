@@ -8,7 +8,6 @@ from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activi
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderListActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.activity.order.activity import RaribleApiOrderMatchActivity
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.asset import Asset
-from rarible_marketplace_indexer.types.tezos_objects.asset_value.xtz_value import Xtz
 from rarible_marketplace_indexer.types.tezos_objects.tezos_object_hash import ImplicitAccountAddress
 
 
@@ -24,7 +23,6 @@ class RaribleApiOrderActivityFactory:
             maker=ImplicitAccountAddress(activity.maker),
             make=Asset.make_from_model(activity),
             take=Asset.take_from_model(activity),
-            price=Xtz(activity.sell_price),
             source=activity.platform,
             date=activity.operation_timestamp,
         )
@@ -40,7 +38,6 @@ class RaribleApiOrderActivityFactory:
             payment=Asset.take_from_model(activity),
             buyer=ImplicitAccountAddress(activity.taker),
             seller=ImplicitAccountAddress(activity.maker),
-            price=Xtz(activity.sell_price),
             source=activity.platform,
             hash=activity.operation_hash,
             date=activity.operation_timestamp,
@@ -72,7 +69,7 @@ class RaribleApiOrderActivityFactory:
             ActivityTypeEnum.GET_BID: cls._build_match_activity,
             ActivityTypeEnum.GET_FLOOR_BID: cls._build_match_activity,
             ActivityTypeEnum.CANCEL_BID: cls._build_cancel_activity,
-            ActivityTypeEnum.CANCEL_FLOOR_BID: cls._build_cancel_activity
+            ActivityTypeEnum.CANCEL_FLOOR_BID: cls._build_cancel_activity,
         }
 
         return method_map.get(activity.type, cls._build_list_activity)

@@ -20,7 +20,6 @@ activity_model = ActivityModel(
     internal_order_id=145,
     maker=ImplicitAccountAddress('tz1bn9ud4BmNGSCTWT86gB23ynR7tuWk8gAk'),
     taker=ImplicitAccountAddress('tz29tCQDFw8KwaMaBuroze6Sv2qd47nnP5Hv'),
-    sell_price=Xtz(3),
     make_asset_class=AssetClassEnum.MULTI_TOKEN,
     make_contract=OriginatedAccountAddress('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton'),
     make_token_id=157097,

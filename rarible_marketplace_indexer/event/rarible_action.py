@@ -23,10 +23,10 @@ from rarible_marketplace_indexer.event.dto import TakeDto
 from rarible_marketplace_indexer.models import PlatformEnum
 from rarible_marketplace_indexer.models import TransactionTypeEnum
 from rarible_marketplace_indexer.types.rarible_api_objects.asset.enum import AssetClassEnum
-from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
-from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_bid import AcceptBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.accept_floor_bid import AcceptFloorBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_bid import CancelBidParameter
+from rarible_marketplace_indexer.types.rarible_bids.parameter.cancel_floor_bid import CancelFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_bid import PutBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.parameter.put_floor_bid import PutFloorBidParameter
 from rarible_marketplace_indexer.types.rarible_bids.storage import RaribleBidsStorage
@@ -184,22 +184,19 @@ class RaribleOrderListEvent(AbstractOrderListEvent):
             value=int(transaction.parameter.s_sale.sale_amount),
             asset_bytes=bytes.fromhex(transaction.parameter.s_sale_asset),
         )
-        make_value = AssetValue(transaction.parameter.s_sale.sale_asset_qty)
-        make_price = AssetValue(take.value / make_value)
 
         return ListDto(
             internal_order_id=internal_order_id,
             maker=ImplicitAccountAddress(transaction.data.sender_address),
-            make_price=make_price,
             make=MakeDto(
                 asset_class=AssetClassEnum.MULTI_TOKEN,
                 contract=OriginatedAccountAddress(transaction.parameter.s_asset_contract),
                 token_id=int(transaction.parameter.s_asset_token_id),
-                value=make_value,
+                value=AssetValue(transaction.parameter.s_sale.sale_asset_qty),
             ),
             take=take,
             start_at=transaction.parameter.s_sale.sale_start,
-            end_at=transaction.parameter.s_sale.sale_end
+            end_at=transaction.parameter.s_sale.sale_end,
         )
 
 
@@ -272,16 +269,14 @@ class RariblePutBidEvent(AbstractPutBidEvent):
             token_id=int(transaction.parameter.pb_asset_token_id),
             value=AssetValue(transaction.parameter.pb_bid.bid_asset_qty),
         )
-        make_price = AssetValue(make.value / take.value)
 
         return ListDto(
             internal_order_id=internal_order_id,
             maker=ImplicitAccountAddress(transaction.data.sender_address),
-            make_price=make_price,
             make=make,
             take=take,
             start_at=transaction.data.timestamp,
-            end_at=transaction.parameter.pb_bid.bid_expiry_date
+            end_at=transaction.parameter.pb_bid.bid_expiry_date,
         )
 
 
@@ -313,16 +308,14 @@ class RariblePutFloorBidEvent(AbstractPutBidEvent):
             token_id=None,
             value=AssetValue(transaction.parameter.pfb_bid.bid_asset_qty),
         )
-        make_price = AssetValue(make.value / take.value)
 
         return ListDto(
             internal_order_id=internal_order_id,
             maker=ImplicitAccountAddress(transaction.data.sender_address),
-            make_price=make_price,
             make=make,
             take=take,
             start_at=transaction.data.timestamp,
-            end_at=transaction.parameter.pfb_bid.bid_expiry_date
+            end_at=transaction.parameter.pfb_bid.bid_expiry_date,
         )
 
 
@@ -344,7 +337,7 @@ class RaribleAcceptBidEvent(AbstractAcceptBidEvent):
             internal_order_id=internal_order_id,
             match_timestamp=transaction.data.timestamp,
             taker=transaction.data.sender_address,
-            token_id=None,
+            token_id=int(transaction.parameter.ab_asset_token_id),
             match_amount=None,
         )
 

@@ -57,11 +57,9 @@ class AbstractOrderListEvent(EventInterface):
                 status=OrderStatusEnum.ACTIVE,
                 start_at=dto.start_at,
                 end_at=dto.end_at,
-                make_stock=dto.make.value,
                 salt=transaction.data.counter,
                 created_at=transaction.data.timestamp,
                 last_updated_at=transaction.data.timestamp,
-                make_price=dto.make_price,
                 maker=dto.maker,
                 make_asset_class=dto.make.asset_class,
                 make_contract=dto.make.contract,
@@ -76,7 +74,7 @@ class AbstractOrderListEvent(EventInterface):
             order.last_updated_at = transaction.data.timestamp
             order.make_value = dto.make.value
             order.take_value = dto.take.value
-            order.save()
+            await order.save()
 
         await ActivityModel.create(
             type=ActivityTypeEnum.ORDER_LIST,
@@ -93,7 +91,6 @@ class AbstractOrderListEvent(EventInterface):
             take_contract=dto.take.contract,
             take_token_id=dto.take.token_id,
             take_value=dto.take.value,
-            sell_price=dto.make_price,
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,
@@ -164,10 +161,9 @@ class AbstractOrderMatchEvent(EventInterface):
     @staticmethod
     @final
     def _process_order_match(order: OrderModel, dto: MatchDto) -> OrderModel:
-        order.make_stock -= dto.match_amount
         order.fill += dto.match_amount
 
-        if order.make_stock <= 0:
+        if order.fill == order.make_value:
             order.status = OrderStatusEnum.FILLED
             order.ended_at = dto.match_timestamp
 
@@ -190,15 +186,6 @@ class AbstractOrderMatchEvent(EventInterface):
             .order_by('-operation_level')
             .first()
         )
-        match_activity = last_list_activity.apply(transaction)
-
-        match_activity.type = ActivityTypeEnum.ORDER_MATCH
-        match_activity.taker = transaction.data.sender_address
-
-        match_activity.make_value = dto.match_amount
-        match_activity.take_value = AssetValue(match_activity.sell_price * dto.match_amount)
-
-        await match_activity.save()
 
         order = await OrderModel.get(
             network=datasource.network,
@@ -206,6 +193,17 @@ class AbstractOrderMatchEvent(EventInterface):
             internal_order_id=dto.internal_order_id,
             status=OrderStatusEnum.ACTIVE,
         )
+
+        match_activity = last_list_activity.apply(transaction)
+
+        match_activity.type = ActivityTypeEnum.ORDER_MATCH
+        match_activity.taker = transaction.data.sender_address
+
+        match_activity.make_value = dto.match_amount
+        match_activity.take_value = AssetValue(order.take_value * dto.match_amount)
+
+        await match_activity.save()
+
         order.last_updated_at = transaction.data.timestamp
         order = cls._process_order_match(order, dto)
 
@@ -245,11 +243,9 @@ class AbstractPutBidEvent(EventInterface):
                 status=OrderStatusEnum.ACTIVE,
                 start_at=dto.start_at,
                 end_at=dto.end_at,
-                make_stock=dto.make.value,
                 salt=transaction.data.counter,
                 created_at=transaction.data.timestamp,
                 last_updated_at=transaction.data.timestamp,
-                make_price=dto.make_price,
                 maker=dto.maker,
                 make_asset_class=dto.make.asset_class,
                 make_contract=dto.make.contract,
@@ -264,7 +260,7 @@ class AbstractPutBidEvent(EventInterface):
             order.last_updated_at = transaction.data.timestamp
             order.make_value = dto.make.value
             order.take_value = dto.take.value
-            order.save()
+            await order.save()
 
         await ActivityModel.create(
             type=ActivityTypeEnum.MAKE_BID,
@@ -281,7 +277,6 @@ class AbstractPutBidEvent(EventInterface):
             take_contract=dto.take.contract,
             take_token_id=dto.take.token_id,
             take_value=dto.take.value,
-            sell_price=dto.make_price,
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,
@@ -323,11 +318,9 @@ class AbstractPutFloorBidEvent(EventInterface):
                 status=OrderStatusEnum.ACTIVE,
                 start_at=dto.start_at,
                 end_at=dto.end_at,
-                make_stock=dto.make.value,
                 salt=transaction.data.counter,
                 created_at=transaction.data.timestamp,
                 last_updated_at=transaction.data.timestamp,
-                make_price=dto.make_price,
                 maker=dto.maker,
                 make_asset_class=dto.make.asset_class,
                 make_contract=dto.make.contract,
@@ -341,8 +334,8 @@ class AbstractPutFloorBidEvent(EventInterface):
         else:
             order.last_updated_at = transaction.data.timestamp
             order.make_value = dto.make.value
-            order.take_value = dto.take_price
-            order.save()
+            order.take_value = dto.take.value
+            await order.save()
 
         await ActivityModel.create(
             type=ActivityTypeEnum.MAKE_FLOOR_BID,
@@ -359,7 +352,6 @@ class AbstractPutFloorBidEvent(EventInterface):
             take_contract=dto.take.contract,
             take_token_id=dto.take.token_id,
             take_value=dto.take.value,
-            sell_price=dto.make_price,
             operation_level=transaction.data.level,
             operation_timestamp=transaction.data.timestamp,
             operation_hash=transaction.data.hash,

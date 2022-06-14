@@ -30,11 +30,11 @@ class TakeDto:
 class ListDto:
     internal_order_id: str
     maker: ImplicitAccountAddress
-    make_price: BaseValue
     make: MakeDto
     take: TakeDto
     start_at: Optional[datetime] = None  # for marketplaces with the possibility of a delayed start of sales
     end_at: Optional[datetime] = None  # for marketplaces with the possibility of sales expiration
+
 
 @dataclass
 class CancelDto:
